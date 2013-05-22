@@ -240,6 +240,7 @@ yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 
 # Generate validation routine (choices)
 yopt_str = ""
+unknown_opt = "printf(\"Unknown %s value %s\\n\", %s);"
 for yopt in yopts:
 	if not len(yopt.choice):
 		continue
@@ -251,8 +252,7 @@ for yopt in yopts:
 			yopt_str += "\t\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
 			yopt_str += "\t} else "
 
-		yopt_str += "{\n\t\tprintf(\"Unknown %s value %%s\\n\", %s);\n\t" % \
-			     (opt_pname(yopt), opt_sname(yopt))
+		yopt_str += "{\n\t\t" + unknown_opt % (opt_pname(yopt), "%s", opt_sname(yopt)) + "\n\t"
 		yopt_str += "\tyopt_err = -1;\n\t}\n\n\t"
 	elif yopt.atype == typ_integer:
 		yopt_str += "switch (%s) {\n\t" % opt_sname(yopt)
@@ -260,8 +260,7 @@ for yopt in yopts:
 			yopt_str += "case %s:\n\t" % ch.val
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "default:\n\t"
-		yopt_str += "\tprintf(\"Unknown %s value %%d\\n\", %s);\n\t" % \
-			     (opt_pname(yopt), opt_sname(yopt))
+		yopt_str += "\t" + unknown_opt % (opt_pname(yopt), "%d", opt_sname(yopt)) + "\n\t"
 		yopt_str += "\tyopt_err = -1;\n\t"
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "}\n"
