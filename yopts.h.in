@@ -1,0 +1,10 @@
+#include <stdbool.h>
+
+struct yopts {
+	${STRUCTURE}
+};
+
+extern struct yopts ${PROJ}_yopts;
+extern int ${PROJ}_yopts_parse(int argc, char **argv);
+
+${CHOICES}

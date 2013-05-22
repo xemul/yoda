@@ -1,0 +1,64 @@
+#include <unistd.h>
+#include <getopt.h>
+#include <stdio.h>
+#include "${PROJ}_yopts.h"
+
+struct yopts ${PROJ}_yopts = { };
+static int ${PROJ}_yopts_usage(char *prog);
+static int ${PROJ}_yopts_validate(void);
+static int yopt_err = 0;
+
+static unsigned int yopt_parse_int(char *str)
+{
+	char *aux;
+	unsigned int ret;
+
+	ret = strtol(str, 10, &aux);
+	if (*aux != '\0')
+		yopt_err = 1;
+
+	return ret;
+}
+
+int ${PROJ}_yopts_parse(int argc, char **argv)
+{
+	int opt, idx;
+	static const char short_opts[] = "${SOPTS}";
+	static const struct option long_opts[] = {
+		${LOPTS}
+		{ }
+	};
+
+	while (1) {
+		opt = getopt_long(argc, argv, short_opts, long_opts, &idx);
+		if (opt == -1)
+			break;
+
+		switch (opt) {
+		${OPTS_ASSIGN}
+		default:
+			return ${PROJ}_yopts_usage(argv[0]);
+		}
+
+		if (yopt_err)
+			return -1;
+	}
+
+	return ${PROJ}_yopts_validate();
+}
+
+static int ${PROJ}_yopts_validate(void)
+{
+	yopt_err = 0;
+
+	${CHECK_DEPS}
+	return yopt_err;
+}
+
+static int ${PROJ}_yopts_usage(char *prog)
+{
+	printf("Usage:\n"
+${USAGE}
+	);
+	return -1;
+}
