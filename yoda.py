@@ -302,20 +302,27 @@ def yoda_gen_one_cexp(exp):
 
 	if yopt.atype == typ_boolean:
 		fixup = ""
-		cval = "true"
+		comp = ""
+		cval = ""
 	elif (yopt.atype == typ_string) & len(yopt.choice):
 		fixup = "_code"
+		comp = "=="
 		for ch in yopt.choice:
 			if ch.val == parts[2].strip():
 				cval = ch.ccode
 				break
 	elif yopt.atype == typ_integer:
 		fixup = ""
-		cval = parts[2]
+		if parts[1]:
+		  	comp = "=="
+			cval = parts[2]
+		else:
+		  	comp = "!="
+		  	cval = "0"
 	else:
 		assert(False) # FIXME
 
-	return "%s%s %s %s" % (opt_sname(yopt), fixup, "==", cval)
+	return "%s%s %s %s" % (opt_sname(yopt), fixup, comp, cval)
 
 def yoda_gen_cexpression(exp_str):
 	exps = exp_str.partition("|")
