@@ -199,6 +199,9 @@ for yopt in yopts:
 	if not getattr(yopt, "lname", None):
 		continue
 
+	if yopt_str:
+		yopt_str += "\n\t\t"
+
 	if yopt.atype != typ_boolean:
 		yopt_rarg = "required_argument"
 	else:
@@ -211,7 +214,7 @@ for yopt in yopts:
 		sopt_rover += 1
 		yopt_sopt = "%d" % yopt.sname_nr
 
-	yopt_str += "{\"%s\", %s, 0, %s},\n\t\t" % (yopt.lname, yopt_rarg, yopt_sopt)
+	yopt_str += "{\"%s\", %s, 0, %s}," % (yopt.lname, yopt_rarg, yopt_sopt)
 
 yincode = yincode.replace("${LOPTS}", yopt_str)
 
@@ -220,6 +223,9 @@ yopt_str = ""
 for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
+
+	if yopt_str:
+		yopt_str += "\n\t\t"
 
 	if getattr(yopt, "sname", None):
 		yopt_str += "case '%s':\n" % yopt.sname
@@ -234,7 +240,7 @@ for yopt in yopts:
 		yopt_assign = "yopt_parse_int(optarg)"
 
 	yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(yopt), yopt_assign)
-	yopt_str += "\t\t\tbreak;\n\t\t"
+	yopt_str += "\t\t\tbreak;"
 
 yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 
