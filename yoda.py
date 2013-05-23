@@ -244,6 +244,25 @@ for yopt in yopts:
 
 yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 
+# Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
+yopt_str = ""
+for yopt in yopts:
+	if yopt.otype != opt_argument:
+		continue
+
+	yopt_str += "if (argc) {\n\t"
+	yopt_str += "\t%s = *argv;\n\t" % opt_sname(yopt)
+	yopt_str += "\tnext_arg();\n\t"
+
+	if not getattr(yopt, "defval", None):
+		yopt_str += "} else {\n\t"
+		yopt_str += "\tprintf(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
+		yopt_str += "\tyopt_err = -1;\n\t"
+
+	yopt_str += "}\n\t"
+
+yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
+
 # Generate validation routine (choices)
 yopt_str = ""
 unknown_opt = "printf(\"Unknown %s value %s\\n\", %s);"

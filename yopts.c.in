@@ -6,6 +6,7 @@
 struct yopts ${PROJ}_yopts = { };
 static int ${PROJ}_yopts_usage(char *prog);
 static int ${PROJ}_yopts_fixup_choices(void);
+static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int yopt_err = 0;
 
 static unsigned int yopt_parse_int(char *str)
@@ -44,11 +45,34 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 			return -1;
 	}
 
+	argc -= optind;
+	argv += optind;
+
+	if (argc) {
+		yopt_err = ${PROJ}_yopts_parse_args(argc, argv);
+		if (yopt_err)
+			return yopt_err;
+	}
+
 	yopt_err = ${PROJ}_yopts_fixup_choices();
 	if (yopt_err)
 		return yopt_err;
 
 	return 0;
+}
+
+static int ${PROJ}_yopts_parse_args(int argc, char **argv)
+{
+#define next_arg()	do {	\
+		argc--;		\
+		argv++;		\
+	} while (0)
+
+	yopt_err = 0;
+
+	${PARSE_ARGS}
+
+	return yopt_err;
 }
 
 static int ${PROJ}_yopts_fixup_choices(void)
