@@ -5,7 +5,7 @@
 
 struct yopts ${PROJ}_yopts = { };
 static int ${PROJ}_yopts_usage(char *prog);
-static int ${PROJ}_yopts_validate(void);
+static int ${PROJ}_yopts_fixup_choices(void);
 static int yopt_err = 0;
 
 static unsigned int yopt_parse_int(char *str)
@@ -44,14 +44,18 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 			return -1;
 	}
 
-	return ${PROJ}_yopts_validate();
+	yopt_err = ${PROJ}_yopts_fixup_choices();
+	if (yopt_err)
+		return yopt_err;
+
+	return 0;
 }
 
-static int ${PROJ}_yopts_validate(void)
+static int ${PROJ}_yopts_fixup_choices(void)
 {
 	yopt_err = 0;
 
-	${CHECK_DEPS}
+	${FIX_CHOICES}
 	return yopt_err;
 }
 

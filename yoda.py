@@ -271,7 +271,7 @@ for yopt in yopts:
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "}\n"
 
-yincode = yincode.replace("${CHECK_DEPS}", yopt_str)
+yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
 
 # Generate usage text
 yopt_str = ""
