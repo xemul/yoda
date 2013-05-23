@@ -365,8 +365,9 @@ if yopt_has_arg:
 		yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
 		if len(yopt.choice) > 0:
 			for ch in yopt.choice:
-				yopt_str += yopt_align + "\"" + yopt_indent + "%s:%*s%s\\n\"\n" \
-					    % (ch.val, 9 + yopt_name_len_max - len(ch.val), " ", ch.summary)
+				yopt_str += yopt_align + "\"" + yopt_indent + \
+					    ch.val.ljust(10 + yopt_name_len_max) + \
+					    ch.summary + "\\n\"\n"
 
 yopt_str += yopt_el
 
@@ -376,40 +377,29 @@ for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
 
-	delim = 0
+	opts = set()
 	if getattr(yopt, "sname", None):
-		yopt_s = "-%s" % yopt.sname
-		delim += 1
-	else:
-		yopt_s = "  "
-
+		opts.add("-%s" % yopt.sname)
 	if getattr(yopt, "lname", None):
-		yopt_l = "--%s" % yopt.lname
-		delim += 1
-	else:
-		yopt_l = ""
+		opts.add("--%s" % yopt.lname)
 
-	if delim == 2:
-		yopt_d = "|"
-	else:
-		yopt_d = " "
+	yopt_sub_str = "|".join(opts)
 
 	if yopt.atype == typ_integer:
-		yopt_a = "[NUM]"
+		yopt_sub_str += " [NUM]"
 	elif yopt.atype == typ_string:
-		yopt_a = "[STR]"
-	else:
-		yopt_a = ""
+		yopt_sub_str += " [STR]"
 
-	yopt_sub_str = "%s%s%s %s" % (yopt_s, yopt_d, yopt_l, yopt_a)
-	yopt_str += yopt_align + "\"" + yopt_indent + "%s%*s%s\\n\"\n" % \
-			(yopt_sub_str, 10 + yopt_name_len_max - len(yopt_sub_str), " ", yopt.summary)
+	yopt_str += yopt_align + "\"" + yopt_indent + \
+		    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
+		    yopt.summary + "\\n\"" + "\n"
 
 	if len(yopt.choice) > 0:
 		for ch in yopt.choice:
-			yopt_sub_str = "%s - %s\\n\"\n" % (ch.val, ch.summary)
-			yopt_str += yopt_align + "\"" + yopt_indent + " %*s%s" % \
-				    (10 + yopt_name_len_max, " ", yopt_sub_str)
+			yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
+			yopt_str += yopt_align + "\"" + yopt_indent + \
+				    "".ljust(10 + yopt_name_len_max) + \
+				    yopt_indent + yopt_sub_str + "\\n\"\n"
 
 yincode = yincode.replace("${USAGE}", yopt_str)
 
