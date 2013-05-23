@@ -43,7 +43,7 @@ yopt_name_len_max = 0
 yopt_has_arg = None
 
 for l in yfile:
-        if (l.startswith("#")):
+	if (l.startswith("#")):
 		continue
 
 	ls = l.strip().split(None, 1)
@@ -64,7 +64,7 @@ for l in yfile:
 	elif (ls[0] == "arg"):
 		yopt = yoption(opt_argument)
 
-	  	yopt.lname = ls[1]
+		yopt.lname = ls[1]
 
 		yopts.append(yopt)
 		if not yopt_has_arg:
@@ -194,21 +194,21 @@ yincode = yincode.replace("${SOPTS}", yopt_str)
 yopt_str = ""
 sopt_rover = 50
 for yopt in yopts:
- 	if yopt.otype != opt_option:
- 		continue
- 	if not getattr(yopt, "lname", None):
- 		continue
- 
+	if yopt.otype != opt_option:
+		continue
+	if not getattr(yopt, "lname", None):
+		continue
+
 	if yopt.atype != typ_boolean:
 		yopt_rarg = "required_argument"
 	else:
 		yopt_rarg = "no_argument"
 
- 	if getattr(yopt, "sname", None):
+	if getattr(yopt, "sname", None):
 		yopt_sopt = "'%s'" % yopt.sname
- 	else:
- 		yopt.sname_nr = sopt_rover
- 		sopt_rover += 1
+	else:
+		yopt.sname_nr = sopt_rover
+		sopt_rover += 1
 		yopt_sopt = "%d" % yopt.sname_nr
 
 	yopt_str += "{\"%s\", %s, 0, %s},\n\t\t" % (yopt.lname, yopt_rarg, yopt_sopt)
@@ -224,7 +224,7 @@ for yopt in yopts:
 	if getattr(yopt, "sname", None):
 		yopt_str += "case '%s':\n" % yopt.sname
 	else:
-	 	yopt_str += "case %d:\n" % yopt.sname_nr
+		yopt_str += "case %d:\n" % yopt.sname_nr
 
 	if yopt.atype == typ_boolean:
 		yopt_assign = "true"
@@ -304,13 +304,13 @@ for yopt in yopts:
 		yopt_s = "-%s" % yopt.sname
 		delim += 1
 	else:
-	 	yopt_s = "  "
+		yopt_s = "  "
 
 	if getattr(yopt, "lname", None):
 		yopt_l = "--%s" % yopt.lname
 		delim += 1
 	else:
-	 	yopt_l = ""
+		yopt_l = ""
 
 	if delim == 2:
 		yopt_d = "|"
