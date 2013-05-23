@@ -55,3 +55,45 @@ option	ext-unix-sk/x
 
 option	tcp-established
 	bool	checkpoint/restore established TCP connections
+
+option	root/r
+	string	change the root filesystem (when run in mount namespace)
+
+option	evasive-devices
+	bool	use any path to a device file if the original one is inaccessible
+
+option	veth-pair
+	string	map inside veth device name to outside one
+
+option	link-remap
+	bool	allow to link unlinked files back when possible
+
+option	shell-job/j
+	bool	allow to dump and restore shell jobs
+
+option	file-locks/l
+	bool	handle file locks, for safety, only used for container
+
+option	log-file/o
+	string	log file name (path is relative to --images-dir)
+
+option	log-pid
+	bool	enable per-process logging to separate FILE.pid files
+
+option	track-mem
+	bool	turn on memory changes tracker in kernel
+
+option	prev-images-dir
+	string	path to images from previous dump (relative to -D)
+
+option	daemon/d
+	bool	run in the background after creating socket
+
+option	file/f
+	string	show contents of a checkpoint file
+
+option	contents/c
+	bool	show contents of pages dumped in hexdump format
+
+option	ms
+	bool	don't check not yet merged kernel features
