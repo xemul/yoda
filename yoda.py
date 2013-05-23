@@ -86,8 +86,6 @@ for l in yfile:
 		yopt.choice.append(yc)
 	elif (ls[0] == "default"):
 		yopt.defval = ls[1]
-	elif (ls[0] == "depends"):
-		yopt.depends = ls[1]
 	else:
 		print "Unknown keyword", ls[0]
 		continue

@@ -12,35 +12,27 @@ arg	action
 
 option	tree/t
 	int	id of tree to dump/restore
-	depends	action = dump | action = restore
 
 option	pid/p
 	int	pid of tree to show/exec
-	depends	action = show
 
 option	images-dir/D
 	string	directory with images
-	depends	action = dump | action = restore
 
 option	page-server
 	bool	use page server for pages images
-	depends	action = dump | action = restore
 
 option	restore-detached/d
 	bool	detach after restore
-	depends	action = restore
 
 option	leave-stopped/s
 	bool	leave tasks stopped after dump
-	depends	action = dump
 
 option	leave-running/R
 	bool	leave tasks running after dump
-	depends	action = dump
 
 option	pidfile
 	string	where to store a pid of a root task
-	depends	action = restore
 
 option	/v
 	int	verbosity level
@@ -53,16 +45,12 @@ option	/v
 
 option	address
 	string	address of page server
-	depends	action = page-server | page-server
 
 option	port
 	int	port of page server
-	depends	action = page-server | page-server
 
 option	ext-unix-sk/x
 	bool	allow external unix connections
-	depends	action = dump | actions = restore
 
 option	tcp-established
 	bool	checkpoint/restore established TCP connections
-	depends	action = dump | action = restore
