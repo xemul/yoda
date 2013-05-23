@@ -86,6 +86,8 @@ for l in yfile:
 		yopt.choice.append(yc)
 	elif (ls[0] == "default"):
 		yopt.defval = ls[1]
+	elif (ls[0] == "req_for"):
+		yopt.required_for = ls[1]
 	else:
 		print "Unknown keyword", ls[0]
 		continue
@@ -289,6 +291,10 @@ for yopt in yopts:
 		yopt_str += "}\n"
 
 yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
+
+# Generate requirements checks (req_for-s)
+yopt_str = ""
+yincode = yincode.replace("${CHECK_REQS}", yopt_str)
 
 # Generate usage text
 yopt_str = ""

@@ -12,9 +12,11 @@ arg	action
 
 option	tree/t
 	int	id of tree to dump/restore
+	req_for	action = dump | action = restore
 
 option	pid/p
 	int	pid of tree to show/exec
+	req_for	action = show
 
 option	images-dir/D
 	string	directory with images
@@ -45,9 +47,11 @@ option	/v
 
 option	address
 	string	address of page server
+	req_for	page-server
 
 option	port
 	int	port of page server
+	req_for	page-server | action = page-server
 
 option	ext-unix-sk/x
 	bool	allow external unix connections
