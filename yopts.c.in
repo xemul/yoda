@@ -46,6 +46,9 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 			return -1;
 	}
 
+	if (${PROJ}_yopts.help)
+		return ${PROJ}_yopts_usage(argv[0]);
+
 	argc -= optind;
 	argv += optind;
 

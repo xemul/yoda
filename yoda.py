@@ -42,6 +42,8 @@ yopts = []
 yopt_name_len_max = 0
 yopt_has_arg = None
 
+short_h_busy = False
+
 for l in yfile:
 	if (l.startswith("#")):
 		continue
@@ -57,6 +59,8 @@ for l in yfile:
 		yopt.lname = ln[0]
 		if (len(ln) == 2):
 			yopt.sname = ln[1]
+			if yopt.sname == "h":
+				short_h_busy = True
 
 		yopts.append(yopt)
 		if (yopt_name_len_max < len(yopt.lname)):
@@ -93,6 +97,17 @@ for l in yfile:
 		continue
 
 yfile.close()
+
+# Add standart help option
+
+yopt = yoption(opt_option)
+yopt.lname = "help"
+yopt.atype = typ_boolean
+yopt.summary = "show help text"
+if not short_h_busy:
+	yopt.sname = "h"
+
+yopts.append(yopt)
 
 ##
 #	
