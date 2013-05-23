@@ -403,11 +403,11 @@ for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
 
-	opts = set()
+	opts = []
 	if getattr(yopt, "sname", None):
-		opts.add("-%s" % yopt.sname)
+		opts.append("-%s" % yopt.sname)
 	if getattr(yopt, "lname", None):
-		opts.add("--%s" % yopt.lname)
+		opts.append("--%s" % yopt.lname)
 
 	yopt_sub_str = "|".join(opts)
 
