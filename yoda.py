@@ -293,7 +293,48 @@ for yopt in yopts:
 yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
 
 # Generate requirements checks (req_for-s)
+
+def yoda_gen_one_cexp(exp):
+	parts = exp.partition("=")
+	for yopt in yopts:
+		if yopt.lname == parts[0].strip():
+			break;
+
+	if yopt.atype == typ_boolean:
+		fixup = ""
+		cval = "true"
+	elif (yopt.atype == typ_string) & len(yopt.choice):
+		fixup = "_code"
+		for ch in yopt.choice:
+			if ch.val == parts[2].strip():
+				cval = ch.ccode
+				break
+	elif yopt.atype == typ_integer:
+		fixup = ""
+		cval = parts[2]
+	else:
+		assert(False) # FIXME
+
+	return "%s%s %s %s" % (opt_sname(yopt), fixup, "==", cval)
+
+def yoda_gen_cexpression(exp_str):
+	exps = exp_str.partition("|")
+	ret_str = yoda_gen_one_cexp(exps[0])
+	if exps[1]:
+		return ("(%s) || " % ret_str) + yoda_gen_cexpression(exps[2])
+	else:
+		return "(%s)" % ret_str
+
 yopt_str = ""
+for yopt in yopts:
+	if not getattr(yopt, "required_for", None):
+		continue
+
+	yopt_str += "if (!%s && (%s)) {\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.required_for))
+	yopt_str += "\tyopt_err = -1;\n\t"
+	yopt_str += "\tprintf(\"Option %s required\\n\");\n\t" % opt_pname(yopt)
+	yopt_str += "}\n\n\t"
+
 yincode = yincode.replace("${CHECK_REQS}", yopt_str)
 
 # Generate usage text
