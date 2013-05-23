@@ -7,8 +7,6 @@ arg	action
 	choice	check		check whether the kernel support is up-to-date
 	choice	exec		execute a system call by other task
 	choice	page-server	run page server
-	default	nil
-
 
 option	tree/t
 	int	id of tree to dump/restore
@@ -43,7 +41,6 @@ option	/v
 	choice	2 warnings
 	choice	3 information
 	choice	4 debug
-	default	+1
 
 option	address
 	string	address of page server
