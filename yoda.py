@@ -42,7 +42,7 @@ yopts = []
 yopt_name_len_max = 0
 yopt_has_arg = None
 
-short_h_busy = False
+std_shorts = set(["v", "V", "h"])
 
 for l in yfile:
 	if (l.startswith("#")):
@@ -59,8 +59,8 @@ for l in yfile:
 		yopt.lname = ln[0]
 		if (len(ln) == 2):
 			yopt.sname = ln[1]
-			if yopt.sname == "h":
-				short_h_busy = True
+			if yopt.sname in std_shorts:
+				std_shorts.remove(yopt.sname)
 
 		yopts.append(yopt)
 		if (yopt_name_len_max < len(yopt.lname)):
@@ -104,8 +104,19 @@ yopt = yoption(opt_option)
 yopt.lname = "help"
 yopt.atype = typ_boolean
 yopt.summary = "show help text"
-if not short_h_busy:
+if "h" in std_shorts:
 	yopt.sname = "h"
+
+# Add version option
+
+yopt = yoption(opt_option)
+yopt.lname = "version"
+yopt.atype = typ_boolean
+yopt.summary = "show version"
+if "v" in std_shorts:
+	yopt.sname = "v"
+elif "V" in std_shorts:
+	yopt.sname = "V"
 
 yopts.append(yopt)
 
