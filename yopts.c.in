@@ -18,7 +18,7 @@ static unsigned int yopt_parse_int(char *str)
 	char *aux;
 	unsigned int ret;
 
-	ret = strtol(str, 10, &aux);
+	ret = strtol(str, &aux, 10);
 	if (*aux != '\0')
 		yopt_err = 1;
 
