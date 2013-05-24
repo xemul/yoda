@@ -33,3 +33,11 @@ option	/f
 	choice	expanded/ploop1 expanding format (grow on demand)
 	choice	preallocated expanding with prealloc
 	req_for	command = init | command = convert
+
+option	/b
+	int	block size
+
+option	/t
+	string	file system type
+	choice	ext3
+	choice	ext4
