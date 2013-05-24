@@ -173,7 +173,7 @@ for yopt in yopts:
 	yopt_str += "%s %s;\n\t" % (ctypes[yopt.atype], opt_cname(yopt))
 	# For non ints with choice generate numerical constants
 	# for faster comparisons in the code
-	if len(yopt.choice) & (yopt.atype != typ_integer):
+	if len(yopt.choice) and (yopt.atype != typ_integer):
 		yopt_str += "%s %s_code;\n\t" % (ctypes[typ_integer], opt_cname(yopt))
 
 yincode = yincode.replace("${STRUCTURE}", yopt_str)
