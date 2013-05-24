@@ -109,6 +109,8 @@ yopt.summary = "show help text"
 if "h" in std_shorts:
 	yopt.sname = "h"
 
+yopts.append(yopt)
+
 # Add version option
 
 yopt = yoption(opt_option)
