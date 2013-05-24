@@ -13,6 +13,15 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = 0;
 
+static void yopt_print(const char *format, ...)
+{
+        va_list params;
+
+        va_start(params, format);
+        fprintf(stderr, format, params);
+        va_end(params);
+}
+
 static unsigned int yopt_parse_int(char *str)
 {
 	char *aux;

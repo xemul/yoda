@@ -292,7 +292,7 @@ for yopt in yopts:
 
 	if not getattr(yopt, "defval", None):
 		yopt_str += "} else {\n\t"
-		yopt_str += "\tprintf(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
+		yopt_str += "\tyopt_print(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
 		yopt_str += "\tyopt_err = -1;\n\t"
 
 	yopt_str += "}\n\t"
@@ -301,7 +301,7 @@ yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
 
 # Generate validation routine (choices)
 yopt_str = ""
-unknown_opt = "printf(\"Unknown %s value %s\\n\", %s);"
+unknown_opt = "yopt_print(\"Unknown %s value %s\\n\", %s);"
 for yopt in yopts:
 	if not len(yopt.choice):
 		continue
@@ -381,7 +381,7 @@ for yopt in yopts:
 
 	yopt_str += "if (!%s && (%s)) {\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.required_for))
 	yopt_str += "\tyopt_err = -1;\n\t"
-	yopt_str += "\tprintf(\"Option %s required\\n\");\n\t" % opt_pname(yopt)
+	yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t" % opt_pname(yopt)
 	yopt_str += "}\n\n\t"
 
 yincode = yincode.replace("${CHECK_REQS}", yopt_str)
