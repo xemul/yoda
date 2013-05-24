@@ -334,7 +334,7 @@ def yoda_gen_one_cexp(exp):
 		fixup = ""
 		comp = ""
 		cval = ""
-	elif (yopt.atype == typ_string) & len(yopt.choice):
+	elif (yopt.atype == typ_string) and (len(yopt.choice) != 0):
 		fixup = "_code"
 		comp = " == "
 		for ch in yopt.choice:
@@ -350,6 +350,7 @@ def yoda_gen_one_cexp(exp):
 		  	comp = " != "
 		  	cval = "0"
 	else:
+		print "No req check for %s\n" % opt_sname(yopt)
 		assert(False) # FIXME
 
 	return "%s%s%s%s" % (opt_sname(yopt), fixup, comp, cval)
