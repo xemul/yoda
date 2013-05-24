@@ -91,7 +91,10 @@ for l in yfile:
 		yc.val = css.pop(0)
 		if len(css):
 			yc.aliases = css
-		yc.summary = cs[1]
+		if len(cs) > 1:
+			yc.summary = cs[1]
+		else:
+		 	yc.summary = ""
 		yopt.choice.append(yc)
 	elif (ls[0] == "default"):
 		yopt.defval = ls[1]
@@ -435,7 +438,10 @@ for yopt in yopts:
 
 	if len(yopt.choice) > 0:
 		for ch in yopt.choice:
-			yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
+			if len(ch.summary):
+				yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
+			else:
+				yopt_sub_str = "%s" % ch.val
 			yopt_str += yopt_align + "\"" + yopt_indent + \
 				    "".ljust(10 + yopt_name_len_max) + \
 				    yopt_indent + yopt_sub_str + "\\n\"\n"
