@@ -17,3 +17,19 @@ arg	command
 	choice	start ???
 	choice	stop ???
 	choice	clear ???
+	choice	convert convert disk formats
+
+option	/s
+	int	disk size
+	req_for	command = init | command = resize
+
+option	/d
+	string	device to work on
+	req_for	command = umount | command = merge | command = snapshot
+
+option	/f
+	string	format of the disk
+	choice	raw raw format
+	choice	expanded expanding format (grow on demand)
+	choice	preallocated expanding with prealloc
+	req_for	command = init | command = convert
