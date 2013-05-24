@@ -9,8 +9,8 @@ arg	action
 	choice	page-server	run page server
 
 option	tree/t
-	int	id of tree to dump/restore
-	req_for	action = dump | action = restore | action = pre-dump
+	int	id of tree to dump
+	req_for	action = dump | action = pre-dump
 
 option	pid/p
 	int	pid of tree to show/exec
