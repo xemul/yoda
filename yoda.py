@@ -73,6 +73,8 @@ for l in yfile:
 		yopts.append(yopt)
 		if not yopt_has_arg:
 			yopt_has_arg = yopt
+		if (yopt_name_len_max < len(yopt.lname)):
+			yopt_name_len_max = len(yopt.lname)
 	elif (ls[0] == "int"):
 		yopt.atype = typ_integer
 		yopt.summary = ls[1]
