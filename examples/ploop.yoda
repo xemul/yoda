@@ -25,7 +25,7 @@ option	/s
 
 option	/d
 	string	device to work on
-	req_for	command = umount | command = merge | command = snapshot
+	req_for	command = umount | command = merge | command = snapshot | command = start | command = stop | command = clear
 
 option	/f
 	string	format of the disk
@@ -41,3 +41,9 @@ option	/t
 	string	file system type
 	choice	ext3
 	choice	ext4
+
+option	/r
+	bool	read-only
+
+option	/m
+	string	mount point
