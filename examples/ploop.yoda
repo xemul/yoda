@@ -1,0 +1,19 @@
+arg	command
+	string	command to execute
+	choice	init initialize ploop device
+	choice	mount attach ploop device to deltas
+	choice	umount detach device from deltas
+	choice	delete remove device
+	choice	merge merge two deltas
+	choice	fsck check image(s) consistency
+	choice	getdev ???
+	choice	resize change size of the device
+	choice	snapshot create a disk snapshot
+	choice	snapshot-delete remove snapshot
+	choice	snapshot-merge merge two snapshots
+	choice	snapshot-switch switch to snapshot
+	choice	snapshot-list list available snapshots
+	choice	stat ???
+	choice	start ???
+	choice	stop ???
+	choice	clear ???
