@@ -412,9 +412,9 @@ for yopt in yopts:
 	yopt_sub_str = "|".join(opts)
 
 	if yopt.atype == typ_integer:
-		yopt_sub_str += " [NUM]"
+		yopt_sub_str += " NUM"
 	elif yopt.atype == typ_string:
-		yopt_sub_str += " [STR]"
+		yopt_sub_str += " STR"
 
 	yopt_str += yopt_align + "\"" + yopt_indent + \
 		    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
