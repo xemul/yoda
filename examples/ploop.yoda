@@ -3,7 +3,7 @@ arg	command
 	choice	init initialize ploop device
 	choice	mount attach ploop device to deltas
 	choice	umount detach device from deltas
-	choice	delete remove device
+	choice	delete/rm remove device
 	choice	merge merge two deltas
 	choice	fsck check image(s) consistency
 	choice	getdev ???
@@ -30,6 +30,6 @@ option	/d
 option	/f
 	string	format of the disk
 	choice	raw raw format
-	choice	expanded expanding format (grow on demand)
+	choice	expanded/ploop1 expanding format (grow on demand)
 	choice	preallocated expanding with prealloc
 	req_for	command = init | command = convert
