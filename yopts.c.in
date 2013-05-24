@@ -1,6 +1,9 @@
 #include <unistd.h>
 #include <getopt.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include "${PROJ}_yopts.h"
 
 struct yopts ${PROJ}_yopts = { };
