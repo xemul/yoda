@@ -94,7 +94,7 @@ for l in yfile:
 		if len(cs) > 1:
 			yc.summary = cs[1]
 		else:
-		 	yc.summary = ""
+			yc.summary = ""
 		yopt.choice.append(yc)
 	elif (ls[0] == "default"):
 		yopt.defval = ls[1]
@@ -355,11 +355,11 @@ def yoda_gen_one_cexp(exp):
 	elif yopt.atype == typ_integer:
 		fixup = ""
 		if parts[1]:
-		  	comp = " == "
+			comp = " == "
 			cval = parts[2]
 		else:
-		  	comp = " != "
-		  	cval = "0"
+			comp = " != "
+			cval = "0"
 	else:
 		print "No req check for %s\n" % opt_sname(yopt)
 		assert(False) # FIXME
