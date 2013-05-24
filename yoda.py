@@ -87,7 +87,10 @@ for l in yfile:
 	elif (ls[0] == "choice"):
 		cs = ls[1].split(None, 1)
 		yc = ychoice()
-		yc.val = cs[0]
+		css = cs[0].split("/")
+		yc.val = css.pop(0)
+		if len(css):
+			yc.aliases = css
 		yc.summary = cs[1]
 		yopt.choice.append(yc)
 	elif (ls[0] == "default"):
@@ -302,8 +305,13 @@ for yopt in yopts:
 
 	if yopt.atype == typ_string:
 		for ch in yopt.choice:
-			yopt_str += "if (!strcmp(%s, \"%s\")) {\n" % \
-				     (opt_sname(yopt), ch.val)
+			yopt_str += "if (!strcmp(%s, \"%s\")" % (opt_sname(yopt), ch.val)
+			if getattr(ch, "aliases", None):
+				for al in ch.aliases:
+					yopt_str += " || !strcmp(%s, \"%s\")" % (opt_sname(yopt), al)
+
+			yopt_str += ") {\n"
+
 			yopt_str += "\t\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
 			yopt_str += "\t} else "
 
@@ -334,7 +342,7 @@ def yoda_gen_one_cexp(exp):
 		fixup = ""
 		comp = ""
 		cval = ""
-	elif (yopt.atype == typ_string) and (len(yopt.choice) != 0):
+	elif (yopt.atype == typ_string) and len(yopt.choice):
 		fixup = "_code"
 		comp = " == "
 		for ch in yopt.choice:
