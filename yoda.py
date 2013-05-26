@@ -100,6 +100,8 @@ for l in yfile:
 		yopt.defval = ls[1]
 	elif (ls[0] == "req_for"):
 		yopt.required_for = ls[1]
+	elif (ls[0] == "for"):
+		yopt.optional_for = ls[1]
 	else:
 		print "Unknown keyword", ls[0]
 		continue
@@ -376,13 +378,20 @@ def yoda_gen_cexpression(exp_str):
 
 yopt_str = ""
 for yopt in yopts:
-	if not getattr(yopt, "required_for", None):
-		continue
+	if getattr(yopt, "required_for", None):
+		yopt_str += "if (%s) {\n\t\t" % yoda_gen_cexpression(yopt.required_for)
+		yopt_str += "if (!%s) {\n\t\t" % opt_sname(yopt)
+		yopt_str += "\tyopt_err = -1;\n\t\t"
+		yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t\t" % opt_pname(yopt)
+		yopt_str += "}\n\t"
+		if getattr(yopt, "optional_for", None):
+			yopt_str += "} else "
+		else:
+			yopt_str += "}\n\n\t"
 
-	yopt_str += "if (!%s && (%s)) {\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.required_for))
-	yopt_str += "\tyopt_err = -1;\n\t"
-	yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t" % opt_pname(yopt)
-	yopt_str += "}\n\n\t"
+	if getattr(yopt, "optional_for", None):
+		yopt_str += "if (%s && !(%s))\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.optional_for))
+		yopt_str += "\tyopt_print(\"Option %s is useless\\n\");\n\n\t" % opt_pname(yopt)
 
 yincode = yincode.replace("${CHECK_REQS}", yopt_str)
 

@@ -24,6 +24,7 @@ option	page-server
 
 option	restore-detached/d
 	bool	detach after restore
+	for	action = restore
 
 option	leave-stopped/s
 	bool	leave tasks stopped after dump
@@ -33,6 +34,7 @@ option	leave-running/R
 
 option	pidfile
 	string	where to store a pid of a root task
+	for	action = restore
 
 option	/v
 	int	verbosity level
@@ -64,6 +66,7 @@ option	evasive-devices
 
 option	veth-pair
 	string	map inside veth device name to outside one
+	for	restore
 
 option	link-remap
 	bool	allow to link unlinked files back when possible
@@ -88,12 +91,16 @@ option	prev-images-dir
 
 option	daemon/d
 	bool	run in the background after creating socket
+	for	page-server
 
 option	file/f
 	string	show contents of a checkpoint file
+	for	action = show
 
 option	contents/c
 	bool	show contents of pages dumped in hexdump format
+	for	action = show
 
 option	ms
 	bool	don't check not yet merged kernel features
+	for	action = check
