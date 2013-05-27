@@ -9,105 +9,105 @@ arg	action
 	choice	page-server	run page server
 
 option	tree/t
-	int	id of tree to dump
-	req_for	action = dump | action = pre-dump
+	int		id of tree to dump
+	req_for		action = dump | action = pre-dump
 
 option	pid/p
-	int	pid of tree to show/exec
-	req_for	action = show | action = exec
+	int		pid of tree to show/exec
+	req_for		action = show | action = exec
 
 option	images-dir/D
-	string	directory with images
+	string		directory with images
 
 option	page-server
-	bool	use page server for pages images
-	for	action = dump | action = pre-dump
+	bool		use page server for pages images
+	for		action = dump | action = pre-dump
 
 option	restore-detached/d
-	bool	detach after restore
-	for	action = restore
+	bool		detach after restore
+	for		action = restore
 
 option	leave-stopped/s
-	bool	leave tasks stopped after dump
-	for	action = dump
+	bool		leave tasks stopped after dump
+	for		action = dump
 
 option	leave-running/R
-	bool	leave tasks running after dump
-	for	action = dump
+	bool		leave tasks running after dump
+	for		action = dump
 
 option	pidfile
-	string	where to store a pid of a root task
-	for	action = restore
+	string		where to store a pid of a root task
+	for		action = restore
 
 option	/v
-	int	verbosity level
-	choice	0 no messages
-	choice	1 errors
-	choice	2 warnings
-	choice	3 information
-	choice	4 debug
+	int		verbosity level
+	choice		0 no messages
+	choice		1 errors
+	choice		2 warnings
+	choice		3 information
+	choice		4 debug
 
 option	address
-	string	address of page server
-	req_for	page-server
+	string		address of page server
+	req_for		page-server
 
 option	port
-	int	port of page server
-	req_for	page-server | action = page-server
+	int		port of page server
+	req_for		page-server | action = page-server
 
 option	ext-unix-sk/x
-	bool	allow external unix connections
+	bool		allow external unix connections
 
 option	tcp-established
-	bool	checkpoint/restore established TCP connections
+	bool		checkpoint/restore established TCP connections
 
 option	root/r
-	string	change the root filesystem (when run in mount namespace)
-	for	action = restore
+	string		change the root filesystem (when run in mount namespace)
+	for		action = restore
 
 option	evasive-devices
-	bool	use any path to a device file if the original one is inaccessible
+	bool		use any path to a device file if the original one is inaccessible
 
 option	veth-pair
-	string	map inside veth device name to outside one
-	for	restore
+	string		map inside veth device name to outside one
+	for		restore
 
 option	link-remap
-	bool	allow to link unlinked files back when possible
+	bool		allow to link unlinked files back when possible
 
 option	shell-job/j
-	bool	allow to dump and restore shell jobs
+	bool		allow to dump and restore shell jobs
 
 option	file-locks/l
-	bool	handle file locks, for safety, only used for container
+	bool		handle file locks, for safety, only used for container
 
 option	log-file/o
-	string	log file name (path is relative to --images-dir)
+	string		log file name (path is relative to --images-dir)
 
 option	log-pid
-	bool	enable per-process logging to separate FILE.pid files
-	for	action = restore
+	bool		enable per-process logging to separate FILE.pid files
+	for		action = restore
 
 option	track-mem
-	bool	turn on memory changes tracker in kernel
-	for	action = dump | action = pre-dump
+	bool		turn on memory changes tracker in kernel
+	for		action = dump | action = pre-dump
 
 option	prev-images-dir
-	string	path to images from previous dump (relative to -D)
-	for	action = dump | action = pre-dump
+	string		path to images from previous dump (relative to -D)
+	for		action = dump | action = pre-dump
 
 option	daemon/d
-	bool	run in the background after creating socket
-	for	page-server
+	bool		run in the background after creating socket
+	for		page-server
 
 option	file/f
-	string	show contents of a checkpoint file
-	for	action = show
+	string		show contents of a checkpoint file
+	for		action = show
 
 option	contents/c
-	bool	show contents of pages dumped in hexdump format
-	for	action = show
+	bool		show contents of pages dumped in hexdump format
+	for		action = show
 
 option	ms
-	bool	don't check not yet merged kernel features
-	for	action = check
+	bool		don't check not yet merged kernel features
+	for		action = check
