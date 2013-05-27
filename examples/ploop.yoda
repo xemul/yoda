@@ -25,7 +25,7 @@ option	/s
 
 option	/d
 	string	device to work on
-	req_for	command = umount | command = merge | command = snapshot | command = start | command = stop | command = clear
+	req_for	command = umount | command = merge | command = snapshot | command = start | command = stop | command = clear | command = delete
 
 option	/f
 	string	format of the disk
@@ -44,6 +44,27 @@ option	/t
 
 option	/r
 	bool	read-only
+	for	command = mount
 
 option	/m
 	string	mount point
+	req_for	command = mount | command = umount
+
+option	/t
+	string	filesystem type to mount
+	for	command = mount
+
+option	/u
+	string	guid for new snapshot?
+
+option	/o
+	string	mount options
+	for	command = mount
+
+option	/c
+	string	component name?
+	for	command = mount | command = umount
+
+option	/l
+	int	level of removal
+	for	command = delete
