@@ -354,6 +354,8 @@ def yoda_gen_one_cexp(exp):
 			if ch.val == parts[2].strip():
 				cval = ch.ccode
 				break
+		else:
+			assert(False)
 	elif yopt.atype == typ_integer:
 		fixup = ""
 		if parts[1]:
