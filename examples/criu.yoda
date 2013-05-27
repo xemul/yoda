@@ -70,7 +70,7 @@ option	evasive-devices
 
 option	veth-pair
 	string		map inside veth device name to outside one
-	for		restore
+	for		action = restore
 
 option	link-remap
 	bool		allow to link unlinked files back when possible
