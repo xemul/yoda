@@ -228,7 +228,8 @@ for yopt in yopts:
 	# for faster comparisons in the code
 	if len(yopt.choice) and (yopt.atype != typ_integer):
 		yopt_str += "%s %s_code;\n\t" % (ctypes[typ_integer], opt_cname(yopt))
-	if opt_need_dup_trick(yopt):
+	yopt.need_dup_trick = opt_need_dup_trick(yopt)
+	if yopt.need_dup_trick:
 		yopt_str += "%s %s_optarg;\n\t" % (ctypes[typ_string], yopt.sname)
 
 yincode = yincode.replace("${STRUCTURE}", yopt_str)
@@ -272,7 +273,7 @@ for yopt in yopts:
 		continue
 
 	yopt_str += yopt.sname
-	if opt_need_dup_trick(yopt):
+	if yopt.need_dup_trick:
 		yopt_str += "::"
 	elif yopt.atype != typ_boolean:
 		yopt_str += ":"
@@ -324,8 +325,7 @@ for yopt in yopts:
 		yopt_str += "case %d:\n" % yopt.sname_nr
 
 	yopt_vassign = opt_sname(yopt)
-	yopt_w_dups = opt_need_dup_trick(yopt)
-	if yopt_w_dups:
+	if yopt.need_dup_trick:
 		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
 	elif yopt.atype == typ_boolean:
@@ -336,7 +336,7 @@ for yopt in yopts:
 		yopt_assign = "yopt_parse_int(optarg)"
 
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
-	if not yopt_w_dups:
+	if not yopt.need_dup_trick:
 		for dup in yopt.short_dups:
 			yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
 	yopt_str += "\t\t\tbreak;"
@@ -465,7 +465,7 @@ def gen_short_trick(dup, yopt, with_cexp):
 for yopt in yopts:
 	if getattr(yopt, "short_dup", None):
 		continue
-	if not opt_need_dup_trick(yopt):
+	if not yopt.need_dup_trick:
 		continue
 
 	yopt.short_dups.append(yopt)
