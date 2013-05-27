@@ -28,6 +28,7 @@ typ_string = 3
 class yoption:
 	def __init__(self, otype):
 		self.choice = []
+		self.short_dups = []
 		self.otype = otype
 	pass
 
@@ -44,6 +45,26 @@ yopt_has_arg = None
 
 std_shorts = set(["v", "V", "h"])
 
+def yopt_find_l(s):
+	if not s[0]:
+		return None
+
+	res = filter(lambda x: x.lname == s[0], yopts)
+	if len(res):
+		return res[0]
+	else:
+	 	return None
+
+def yopt_find_s(s):
+	if len(s) == 1:
+		return None
+
+	res = filter(lambda x: getattr(x, "sname", None) == s[1], yopts)
+	if len(res):
+		return res[0]
+	else:
+	 	return None
+
 for l in yfile:
 	if (l.startswith("#")):
 		continue
@@ -53,9 +74,16 @@ for l in yfile:
 		continue
 
 	if (ls[0] == "option"):
-		yopt = yoption(opt_option)
-
 		ln = ls[1].split("/")
+
+		yex = yopt_find_l(ln)
+		if yex:
+			print "Duplicate option name"
+			assert(False)
+
+		yex = yopt_find_s(ln)
+
+		yopt = yoption(opt_option)
 		yopt.lname = ln[0]
 		if (len(ln) == 2):
 			yopt.sname = ln[1]
@@ -63,6 +91,10 @@ for l in yfile:
 				std_shorts.remove(yopt.sname)
 
 		yopts.append(yopt)
+		if yex:
+			yopt.short_dup = yex
+			yex.short_dups.append(yopt)
+
 		if (yopt_name_len_max < len(yopt.lname)):
 			yopt_name_len_max = len(yopt.lname)
 	elif (ls[0] == "arg"):
@@ -221,6 +253,8 @@ yopt_str = ""
 for yopt in yopts:
 	if not getattr(yopt, "sname", None):
 		continue
+	if getattr(yopt, "short_dup", None):
+		continue
 
 	yopt_str += yopt.sname
 	if yopt.atype != typ_boolean:
@@ -261,6 +295,8 @@ yopt_str = ""
 for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
+	if getattr(yopt, "short_dup", None):
+		continue
 
 	if yopt_str:
 		yopt_str += "\n\t\t"
@@ -278,6 +314,9 @@ for yopt in yopts:
 		yopt_assign = "yopt_parse_int(optarg)"
 
 	yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(yopt), yopt_assign)
+	for dup in yopt.short_dups:
+		assert(dup.atype == yopt.atype) # FIXME
+		yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
 	yopt_str += "\t\t\tbreak;"
 
 yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
