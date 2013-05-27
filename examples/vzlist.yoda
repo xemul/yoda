@@ -1,0 +1,35 @@
+option	no-header/H
+	bool	suppress columns header
+
+option	no-trim/t
+	bool	don't trim long values
+
+option	stopped/S
+	bool	list stopped containers
+
+option	all/a
+	bool	list all containers
+
+option	name/n
+	bool	display container name
+
+option	json/j
+	bool	output in json format
+
+option	name-filter/N
+	string	filter containers by name PATtern
+
+option	hostname/h
+	string	filter containers by hostname PATtern
+
+option	description/d
+	string	filter containers by description PATtern
+
+option	output/o
+	string	optput only specified FieLDS
+
+option	sort/s
+	string	sort by specified FIELD ('-field' for reverse sort)
+
+option	list/L
+	bool	get possible field names
