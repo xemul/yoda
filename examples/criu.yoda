@@ -98,7 +98,7 @@ option	prev-images-dir
 
 option	daemon/d
 	bool		run in the background after creating socket
-	for		page-server
+	for		action = page-server
 
 option	file/f
 	string		show contents of a checkpoint FILE
