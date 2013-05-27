@@ -9,15 +9,15 @@ arg	action
 	choice	page-server	run page server
 
 option	tree/t
-	int		id of tree to dump
+	int		ID of tree to dump
 	req_for		action = dump | action = pre-dump
 
 option	pid/p
-	int		pid of tree to show/exec
+	int		PID of tree to show/exec
 	req_for		action = show | action = exec
 
 option	images-dir/D
-	string		directory with images
+	string		DIRectory with images
 
 option	page-server
 	bool		use page server for pages images
@@ -36,11 +36,11 @@ option	leave-running/R
 	for		action = dump
 
 option	pidfile
-	string		where to store a pid of a root task
+	string		FILE where to store a pid of a root task
 	for		action = restore
 
 option	/v
-	int		verbosity level
+	int		verbosity Level
 	choice		0 no messages
 	choice		1 errors
 	choice		2 warnings
@@ -48,11 +48,11 @@ option	/v
 	choice		4 debug
 
 option	address
-	string		address of page server
+	string		ADDRess of page server
 	req_for		page-server
 
 option	port
-	int		port of page server
+	int		PORT of page server
 	req_for		page-server | action = page-server
 
 option	ext-unix-sk/x
@@ -62,7 +62,7 @@ option	tcp-established
 	bool		checkpoint/restore established TCP connections
 
 option	root/r
-	string		change the root filesystem (when run in mount namespace)
+	string		change the ROOT filesystem (when run in mount namespace)
 	for		action = restore
 
 option	evasive-devices
@@ -82,7 +82,7 @@ option	file-locks/l
 	bool		handle file locks, for safety, only used for container
 
 option	log-file/o
-	string		log file name (path is relative to --images-dir)
+	string		log FILE name (path is relative to --images-dir)
 
 option	log-pid
 	bool		enable per-process logging to separate FILE.pid files
@@ -93,7 +93,7 @@ option	track-mem
 	for		action = dump | action = pre-dump
 
 option	prev-images-dir
-	string		path to images from previous dump (relative to -D)
+	string		PATH to images from previous dump (relative to --images-dir)
 	for		action = dump | action = pre-dump
 
 option	daemon/d
@@ -101,7 +101,7 @@ option	daemon/d
 	for		page-server
 
 option	file/f
-	string		show contents of a checkpoint file
+	string		show contents of a checkpoint FILE
 	for		action = show
 
 option	contents/c

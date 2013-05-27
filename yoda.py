@@ -423,6 +423,14 @@ if yopt_has_arg:
 yopt_str += yopt_el
 
 # "Options" block
+def yopt_argname(yopt, dflt):
+	# Remove all but UPPERCASE letters
+	s = filter(lambda x: x.isupper(), yopt.summary)
+	if len(s):
+		return s
+	else:
+	 	return dflt
+
 yopt_str += yopt_align + "\"Options:\\n\"\n"
 for yopt in yopts:
 	if yopt.otype != opt_option:
@@ -437,13 +445,13 @@ for yopt in yopts:
 	yopt_sub_str = "|".join(opts)
 
 	if yopt.atype == typ_integer:
-		yopt_sub_str += " NUM"
+		yopt_sub_str += " " + yopt_argname(yopt, "NUM")
 	elif yopt.atype == typ_string:
-		yopt_sub_str += " STR"
+		yopt_sub_str += " " + yopt_argname(yopt, "STR")
 
 	yopt_str += yopt_align + "\"" + yopt_indent + \
 		    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
-		    yopt.summary + "\\n\"" + "\n"
+		    yopt.summary.lower() + "\\n\"" + "\n"
 
 	if len(yopt.choice) > 0:
 		for ch in yopt.choice:
