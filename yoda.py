@@ -178,12 +178,14 @@ ctypes = {
 	typ_string:	"char *",
 }
 
+# Name of yopts struct member
 def opt_cname(yopt):
 	if yopt.lname:
 		return yopt.lname.replace("-", "_")
 	else:
 		return "opt_" + yopt.sname
 
+# Name of option when printed on a screen
 def opt_pname(yopt):
 	if yopt.otype == opt_option:
 		if yopt.lname:
@@ -196,9 +198,11 @@ def opt_pname(yopt):
 		else:
 			return yopt.sname
 
+# Name of variable (with struct name)
 def opt_sname(yopt):
 	return "%s_yopts.%s" % (yname, opt_cname(yopt))
 
+# Name of variable (short version, for duplicates)
 def opt_ssname(yopt):
 	return "%s_yopts.%s" % (yname, yopt.sname)
 
