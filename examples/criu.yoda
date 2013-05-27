@@ -21,6 +21,7 @@ option	images-dir/D
 
 option	page-server
 	bool	use page server for pages images
+	for	action = dump | action = pre-dump
 
 option	restore-detached/d
 	bool	detach after restore
@@ -28,9 +29,11 @@ option	restore-detached/d
 
 option	leave-stopped/s
 	bool	leave tasks stopped after dump
+	for	action = dump
 
 option	leave-running/R
 	bool	leave tasks running after dump
+	for	action = dump
 
 option	pidfile
 	string	where to store a pid of a root task
@@ -60,6 +63,7 @@ option	tcp-established
 
 option	root/r
 	string	change the root filesystem (when run in mount namespace)
+	for	action = restore
 
 option	evasive-devices
 	bool	use any path to a device file if the original one is inaccessible
@@ -82,12 +86,15 @@ option	log-file/o
 
 option	log-pid
 	bool	enable per-process logging to separate FILE.pid files
+	for	action = restore
 
 option	track-mem
 	bool	turn on memory changes tracker in kernel
+	for	action = dump | action = pre-dump
 
 option	prev-images-dir
 	string	path to images from previous dump (relative to -D)
+	for	action = dump | action = pre-dump
 
 option	daemon/d
 	bool	run in the background after creating socket
