@@ -35,8 +35,12 @@ option	/f
 	choice	preallocated expanding with prealloc
 	req_for	command = init | command = convert
 
-option	/b
+option	block-size/b
 	int	block size
+
+option	max-balloon/b
+	bool	inflate maximal balloon
+	for	command = resize
 
 option	/t
 	string	file system type
@@ -50,10 +54,6 @@ option	/r
 option	/m
 	string	mount point
 	req_for	command = mount | command = umount
-
-option	/t
-	string	filesystem type to mount
-	for	command = mount
 
 option	/u
 	string	guid for new snapshot?

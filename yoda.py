@@ -199,6 +199,15 @@ def opt_pname(yopt):
 def opt_sname(yopt):
 	return "%s_yopts.%s" % (yname, opt_cname(yopt))
 
+def opt_ssname(yopt):
+	return "%s_yopts.%s" % (yname, yopt.sname)
+
+def opt_need_dup_trick(yopt):
+	for dup in yopt.short_dups:
+		if dup.atype != yopt.atype:
+			return True
+	return False
+
 #
 # Generate the .h file
 #
@@ -215,6 +224,8 @@ for yopt in yopts:
 	# for faster comparisons in the code
 	if len(yopt.choice) and (yopt.atype != typ_integer):
 		yopt_str += "%s %s_code;\n\t" % (ctypes[typ_integer], opt_cname(yopt))
+	if opt_need_dup_trick(yopt):
+		yopt_str += "%s %s_optarg;\n\t" % (ctypes[typ_string], yopt.sname)
 
 yincode = yincode.replace("${STRUCTURE}", yopt_str)
 
@@ -257,7 +268,9 @@ for yopt in yopts:
 		continue
 
 	yopt_str += yopt.sname
-	if yopt.atype != typ_boolean:
+	if opt_need_dup_trick(yopt):
+		yopt_str += "::"
+	elif yopt.atype != typ_boolean:
 		yopt_str += ":"
 
 yincode = yincode.replace("${SOPTS}", yopt_str)
@@ -306,17 +319,22 @@ for yopt in yopts:
 	else:
 		yopt_str += "case %d:\n" % yopt.sname_nr
 
-	if yopt.atype == typ_boolean:
+	yopt_vassign = opt_sname(yopt)
+	yopt_w_dups = opt_need_dup_trick(yopt)
+	if yopt_w_dups:
+		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
+		yopt_vassign = opt_ssname(yopt) + "_optarg"
+	elif yopt.atype == typ_boolean:
 		yopt_assign = "true"
 	elif yopt.atype == typ_string:
 		yopt_assign = "optarg"
 	elif yopt.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(optarg)"
 
-	yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(yopt), yopt_assign)
-	for dup in yopt.short_dups:
-		assert(dup.atype == yopt.atype) # FIXME
-		yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
+	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
+	if not yopt_w_dups:
+		for dup in yopt.short_dups:
+			yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
 	yopt_str += "\t\t\tbreak;"
 
 yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
@@ -374,7 +392,7 @@ for yopt in yopts:
 
 yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
 
-# Generate requirements checks (req_for-s)
+# Expressions generator
 
 def yoda_gen_one_cexp(exp):
 	parts = exp.partition("=")
@@ -416,6 +434,54 @@ def yoda_gen_cexpression(exp_str):
 		return ("(%s) || " % ret_str) + yoda_gen_cexpression(exps[2])
 	else:
 		return "(%s)" % ret_str
+
+
+# Generate dups fixups
+yopt_str = ""
+
+def gen_short_trick(dup, yopt, with_cexp):
+	yopt_sub_str = ""
+	if (with_cexp):
+		yopt_sub_str = "if (%s) " % yoda_gen_cexpression(dup.optional_for)
+
+	if dup.atype == typ_boolean:
+		yopt_assign = "(%s_optarg == (char *)-1)"
+	elif dup.atype == typ_integer:
+		yopt_assign = "yopt_parse_int(%s_optarg)"
+	elif dup.atype == typ_string:
+		yopt_assign = "%s_optarg"
+
+	yopt_assign %= opt_ssname(yopt)
+	yopt_sub_str += "{\n\t\t%s = %s;\n\t}" % (opt_sname(dup), yopt_assign)
+	if with_cexp:
+		yopt_sub_str += " else "
+	return yopt_sub_str
+
+
+for yopt in yopts:
+	if getattr(yopt, "short_dup", None):
+		continue
+	if not opt_need_dup_trick(yopt):
+		continue
+
+	yopt.short_dups.append(yopt)
+	last = None
+	for dup in yopt.short_dups:
+		if getattr(dup, "optional_for", None):
+			yopt_str += gen_short_trick(dup, yopt, True)
+		else:
+			assert(not last)
+			last = dup
+
+	if last:
+		yopt_str += gen_short_trick(last, yopt, False)
+
+	yopt.short_dups.pop()
+
+
+yincode = yincode.replace("${FIX_DUPS}", yopt_str)
+
+# Generate requirements checks (req_for-s)
 
 yopt_str = ""
 for yopt in yopts:

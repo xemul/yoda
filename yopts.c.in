@@ -8,6 +8,7 @@
 
 struct yopts ${PROJ}_yopts = { };
 static int ${PROJ}_yopts_usage(char *prog);
+static int ${PROJ}_yopts_fixup_dups(void);
 static int ${PROJ}_yopts_fixup_choices(void);
 static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int ${PROJ}_yopts_check_reqs(void);
@@ -70,6 +71,10 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 			return yopt_err;
 	}
 
+	yopt_err = ${PROJ}_yopts_fixup_dups();
+	if (yopt_err)
+		return yopt_err;
+
 	yopt_err = ${PROJ}_yopts_fixup_choices();
 	if (yopt_err)
 		return yopt_err;
@@ -90,6 +95,14 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv)
 
 	${PARSE_ARGS}
 
+	return yopt_err;
+}
+
+static int ${PROJ}_yopts_fixup_dups(void)
+{
+	yopt_err = 0;
+
+	${FIX_DUPS}
 	return yopt_err;
 }
 
