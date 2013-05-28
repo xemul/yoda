@@ -14,7 +14,7 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = YOPTS_PARSE_OK;
 
-static void yopt_print(const char *format, ...)
+__attribute__((weak)) void yopt_print(const char *format, ...)
 {
         va_list params;
 
