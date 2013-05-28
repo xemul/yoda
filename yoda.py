@@ -44,6 +44,9 @@ yopt_name_len_max = 0
 
 std_shorts = set(["v", "V", "h"])
 
+def_for = None
+def_req_for = None
+
 def yopt_find_l(s):
 	if not s[0]:
 		return None
@@ -89,6 +92,11 @@ for l in yfile:
 			if yopt.sname in std_shorts:
 				std_shorts.remove(yopt.sname)
 
+		if def_for:
+			yopt.optional_for = def_for
+		if def_req_for:
+			yopt.required_for = def_req_for
+
 		yopts.append(yopt)
 		if yex:
 			yopt.short_dup = yex
@@ -133,6 +141,21 @@ for l in yfile:
 		yopt.required_for = ls[1]
 	elif (ls[0] == "for"):
 		yopt.optional_for = ls[1]
+	elif (ls[0] == "set"):
+		ls = ls[1].split(None, 1)
+		if ls[0] == "for":
+			def_for = ls[1]
+		elif ls[0] == "req_for":
+			def_req_for = ls[1]
+		else:
+		 	print "Unknown set", ls[0]
+	elif (ls[0] == "unset"):
+		if ls[1] == "for":
+			def_for = None
+		elif ls[1] == "req_for":
+			def_req_for = None
+		else:
+		 	print "Unknown unset", ls[0]
 	else:
 		print "Unknown keyword", ls[0]
 		continue
