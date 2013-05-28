@@ -111,3 +111,7 @@ option	contents/c
 option	ms
 	bool		don't check not yet merged kernel features
 	for		action = check
+
+option	namespaces/n
+	string
+	for		action = restore

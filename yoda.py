@@ -115,7 +115,9 @@ for l in yfile:
 		yopt.summary = ls[1]
 	elif (ls[0] == "string"):
 		yopt.atype = typ_string
-		yopt.summary = ls[1]
+		if len(ls) == 2:
+			yopt.summary = ls[1]
+		# else option is deprecated
 	elif (ls[0] == "choice"):
 		cs = ls[1].split(None, 1)
 		yc = ychoice()
@@ -211,6 +213,9 @@ def opt_need_dup_trick(yopt):
 		if dup.atype != yopt.atype:
 			return True
 	return False
+
+def opt_deprecated(yopt):
+	return not getattr(yopt, "summary", None)
 
 #
 # Generate the .h file
@@ -523,6 +528,8 @@ if yopt_has_arg:
 	for yopt in yopts:
 		if (yopt.otype != opt_argument):
 			continue
+		if opt_deprecated(yopt):
+			continue
 
 		yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
 		if len(yopt.choice) > 0:
@@ -545,6 +552,8 @@ def yopt_argname(yopt, dflt):
 yopt_str += yopt_align + "\"Options:\\n\"\n"
 for yopt in yopts:
 	if yopt.otype != opt_option:
+		continue
+	if opt_deprecated(yopt):
 		continue
 
 	opts = []
