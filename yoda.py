@@ -92,6 +92,9 @@ for l in yfile:
 			if yopt.sname in std_shorts:
 				std_shorts.remove(yopt.sname)
 
+		if len(ln):
+			yopt.laliases = ln
+
 		if def_for:
 			yopt.optional_for = def_for
 		if def_req_for:
@@ -311,9 +314,6 @@ for yopt in yopts:
 	if not getattr(yopt, "lname", None):
 		continue
 
-	if yopt_str:
-		yopt_str += "\n\t\t"
-
 	if yopt.atype != typ_boolean:
 		yopt_rarg = "required_argument"
 	else:
@@ -326,7 +326,14 @@ for yopt in yopts:
 		sopt_rover += 1
 		yopt_sopt = "%d" % yopt.sname_nr
 
-	yopt_str += "{\"%s\", %s, 0, %s}," % (yopt.lname, yopt_rarg, yopt_sopt)
+	lnames = getattr(yopt, "laliases", [])
+	lnames.insert(0, yopt.lname)
+
+	for lname in lnames:
+		if yopt_str:
+			yopt_str += "\n\t\t"
+
+		yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
 
 yincode = yincode.replace("${LOPTS}", yopt_str)
 
