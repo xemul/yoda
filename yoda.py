@@ -588,10 +588,7 @@ for yopt in yopts:
 def yopt_argname(yopt, dflt):
 	# Remove all but UPPERCASE letters
 	s = filter(lambda x: x.isupper(), yopt.summary)
-	if len(s):
-		return s
-	else:
-	 	return dflt
+	return len(s) and s or dflt
 
 yopt_str += yopt_align + "\"Options:\\n\"\n"
 for yopt in yopts:
