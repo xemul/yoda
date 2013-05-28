@@ -120,10 +120,12 @@ for l in yfile:
 			yopt_name_len_max = len(yopt.lname)
 	elif (ls[0] == "int"):
 		yopt.atype = typ_integer
-		yopt.summary = ls[1]
+		if len(ls) == 2:
+			yopt.summary = ls[1]
 	elif (ls[0] == "bool"):
 		yopt.atype = typ_boolean
-		yopt.summary = ls[1]
+		if len(ls) == 2:
+			yopt.summary = ls[1]
 	elif (ls[0] == "string"):
 		yopt.atype = typ_string
 		if len(ls) == 2:
