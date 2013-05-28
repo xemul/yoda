@@ -158,7 +158,7 @@ for l in yfile:
 		 	print "Unknown unset", ls[0]
 	else:
 		print "Unknown keyword", ls[0]
-		continue
+		assert(False)
 
 yfile.close()
 
