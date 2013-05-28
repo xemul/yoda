@@ -48,20 +48,17 @@ def_for = None
 def_req_for = None
 
 def yopt_find_l(s):
-	if not s[0]:
+	if not s:
 		return None
 
-	res = filter(lambda x: x.lname == s[0], yopts)
+	res = filter(lambda x: x.lname == s, yopts)
 	if len(res):
 		return res[0]
 	else:
 	 	return None
 
 def yopt_find_s(s):
-	if len(s) == 1:
-		return None
-
-	res = filter(lambda x: getattr(x, "sname", None) == s[1], yopts)
+	res = filter(lambda x: getattr(x, "sname", None) == s, yopts)
 	if len(res):
 		return res[0]
 	else:
@@ -76,19 +73,22 @@ for l in yfile:
 		continue
 
 	if (ls[0] == "option"):
+		yopt = yoption(opt_option)
 		ln = ls[1].split("/")
 
-		yex = yopt_find_l(ln)
+		yopt.lname = ln.pop(0)
+		yex = yopt_find_l(yopt.lname)
 		if yex:
 			print "Duplicate option name"
 			assert(False)
 
-		yex = yopt_find_s(ln)
+		if len(ln):
+			yopt.sname = ln.pop(0)
+			yex = yopt_find_s(yopt.sname)
+			if yex:
+				yopt.short_dup = yex
+				yex.short_dups.append(yopt)
 
-		yopt = yoption(opt_option)
-		yopt.lname = ln[0]
-		if (len(ln) == 2):
-			yopt.sname = ln[1]
 			if yopt.sname in std_shorts:
 				std_shorts.remove(yopt.sname)
 
@@ -98,9 +98,6 @@ for l in yfile:
 			yopt.required_for = def_req_for
 
 		yopts.append(yopt)
-		if yex:
-			yopt.short_dup = yex
-			yex.short_dups.append(yopt)
 
 		if (yopt_name_len_max < len(yopt.lname)):
 			yopt_name_len_max = len(yopt.lname)
