@@ -7,12 +7,12 @@
 #include "${PROJ}_yopts.h"
 
 struct yopts ${PROJ}_yopts = { };
-static int ${PROJ}_yopts_usage(char *prog);
+static int ${PROJ}_yopts_usage(char *prog, int ret);
 static int ${PROJ}_yopts_fixup_dups(void);
 static int ${PROJ}_yopts_fixup_choices(void);
 static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int ${PROJ}_yopts_check_reqs(void);
-static int yopt_err = 0;
+static int yopt_err = YOPTS_PARSE_OK;
 
 static void yopt_print(const char *format, ...)
 {
@@ -30,7 +30,7 @@ static unsigned int yopt_parse_int(char *str)
 
 	ret = strtol(str, &aux, 10);
 	if (*aux != '\0')
-		yopt_err = 1;
+		yopt_err = YOPTS_PARSE_ERR;
 
 	return ret;
 }
@@ -52,7 +52,7 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		switch (opt) {
 		${OPTS_ASSIGN}
 		default:
-			return ${PROJ}_yopts_usage(argv[0]);
+			return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_ERR);
 		}
 
 		if (yopt_err)
@@ -60,7 +60,9 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 	}
 
 	if (${PROJ}_yopts.help)
-		return ${PROJ}_yopts_usage(argv[0]);
+		return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
+	if (${PROJ}_yopts.version)
+		return YOPTS_PARSE_SPECIAL;
 
 	argc -= optind;
 	argv += optind;
@@ -81,7 +83,7 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 
 	yopt_err = ${PROJ}_yopts_check_reqs();
 
-	return 0;
+	return YOPTS_PARSE_OK;
 }
 
 static int ${PROJ}_yopts_parse_args(int argc, char **argv)
@@ -91,7 +93,7 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv)
 		argv++;		\
 	} while (0)
 
-	yopt_err = 0;
+	yopt_err = YOPTS_PARSE_OK;
 
 	${PARSE_ARGS}
 
@@ -100,7 +102,7 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv)
 
 static int ${PROJ}_yopts_fixup_dups(void)
 {
-	yopt_err = 0;
+	yopt_err = YOPTS_PARSE_OK;
 
 	${FIX_DUPS}
 	return yopt_err;
@@ -108,7 +110,7 @@ static int ${PROJ}_yopts_fixup_dups(void)
 
 static int ${PROJ}_yopts_fixup_choices(void)
 {
-	yopt_err = 0;
+	yopt_err = YOPTS_PARSE_OK;
 
 	${FIX_CHOICES}
 	return yopt_err;
@@ -116,16 +118,16 @@ static int ${PROJ}_yopts_fixup_choices(void)
 
 static int ${PROJ}_yopts_check_reqs(void)
 {
-	yopt_err = 0;
+	yopt_err = YOPTS_PARSE_OK;
 
 	${CHECK_REQS}
 	return yopt_err;
 }
 
-static int ${PROJ}_yopts_usage(char *prog)
+static int ${PROJ}_yopts_usage(char *prog, int ret)
 {
 	printf("Usage:\n"
 ${USAGE}
 	);
-	return -1;
+	return ret;
 }

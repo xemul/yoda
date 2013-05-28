@@ -361,7 +361,7 @@ for yopt in yopts:
 	if not getattr(yopt, "defval", None):
 		yopt_str += "} else {\n\t"
 		yopt_str += "\tyopt_print(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
-		yopt_str += "\tyopt_err = -1;\n\t"
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
 
 	yopt_str += "}\n\t"
 
@@ -387,7 +387,7 @@ for yopt in yopts:
 			yopt_str += "\t} else "
 
 		yopt_str += "{\n\t\t" + unknown_opt % (opt_pname(yopt), "%s", opt_sname(yopt)) + "\n\t"
-		yopt_str += "\tyopt_err = -1;\n\t}\n\n\t"
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t}\n\n\t"
 	elif yopt.atype == typ_integer:
 		yopt_str += "switch (%s) {\n\t" % opt_sname(yopt)
 		for ch in yopt.choice:
@@ -395,7 +395,7 @@ for yopt in yopts:
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "default:\n\t"
 		yopt_str += "\t" + unknown_opt % (opt_pname(yopt), "%d", opt_sname(yopt)) + "\n\t"
-		yopt_str += "\tyopt_err = -1;\n\t"
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "}\n"
 
@@ -497,7 +497,7 @@ for yopt in yopts:
 	if getattr(yopt, "required_for", None):
 		yopt_str += "if (%s) {\n\t\t" % yoda_gen_cexpression(yopt.required_for)
 		yopt_str += "if (!%s) {\n\t\t" % opt_sname(yopt)
-		yopt_str += "\tyopt_err = -1;\n\t\t"
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t\t"
 		yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t\t" % opt_pname(yopt)
 		yopt_str += "}\n\t"
 		if getattr(yopt, "optional_for", None):
