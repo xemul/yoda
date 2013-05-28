@@ -64,7 +64,13 @@ def yopt_find_s(s):
 	else:
 	 	return None
 
-sopt_rover = 50
+def next_rover(rover):
+	rover += 1
+	while chr(rover).isalnum():
+		rover += 1
+	return rover
+
+sopt_rover = next_rover(0)
 
 for l in yfile:
 	if (l.startswith("#")):
@@ -99,7 +105,7 @@ for l in yfile:
 
 		if not getattr(yopt, "sname", None):
 			yopt.sname_nr = sopt_rover
-			sopt_rover += 1
+			sopt_rover = next_rover(sopt_rover)
 
 		if def_for:
 			yopt.optional_for = def_for
@@ -182,7 +188,7 @@ if "h" in std_shorts:
 	yopt.sname = "h"
 else:
 	yopt.sname_nr = sopt_rover
-	sopt_rover += 1
+	sopt_rover = next_rover(sopt_rover)
 
 yopts.append(yopt)
 
@@ -198,7 +204,7 @@ elif "V" in std_shorts:
 	yopt.sname = "V"
 else:
 	yopt.sname_nr = sopt_rover
-	sopt_rover += 1
+	sopt_rover = next_rover(sopt_rover)
 
 yopts.append(yopt)
 
