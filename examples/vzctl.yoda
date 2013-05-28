@@ -71,3 +71,23 @@ option	local-gid
 	string	?
 
 unset	for
+
+option	force
+	bool	forced start
+	for	command = start | command = restart
+
+option	skip_ve_setup
+	bool	don't run ve configuration scripts
+	for	command = start | command = restart
+
+option	wait
+	bool	wait till ve is really started
+	for	command = start | command = restart
+
+option	fast
+	bool	kill ve rather than stop one
+	for	command = stop | command = restart
+
+option	skip-umount
+	bool	don't umount ct's filesystem
+	for	command = stop | command = restart
