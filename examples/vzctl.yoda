@@ -1,0 +1,24 @@
+arg	command
+	string	command to execute
+	choice	create		create a container
+	choice	start		start a container
+	choice	stop		stop a container
+	choice	destroy		destroy a container
+	choice	mount		mount container's filesystem
+	choice	umount		umount container's filesystem
+	choice	restart		restart a container
+	choice	status		show container's status
+	choice	quotainit	initialize quota for container
+	choice	quotaon		turn quota on
+	choice	quotaoff	turn quota off
+	choice	console		open container's console
+	choice	enter		enter the container
+	choice	exec		execute a commaind inside container
+	choice	exec2		the same, but ...
+	choice	runscript	?
+	choice	suspent/chkpnt	suspend a container
+	choice	resume/restore	resume container after suspend
+	choice	set		configure container's parameters
+
+arg	ctid
+	int	container ID
