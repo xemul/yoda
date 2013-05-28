@@ -41,7 +41,6 @@ yfile = open(sys.argv[1])
 
 yopts = []
 yopt_name_len_max = 0
-yopt_has_arg = None
 
 std_shorts = set(["v", "V", "h"])
 
@@ -103,8 +102,6 @@ for l in yfile:
 		yopt.lname = ls[1]
 
 		yopts.append(yopt)
-		if not yopt_has_arg:
-			yopt_has_arg = yopt
 		if (yopt_name_len_max < len(yopt.lname)):
 			yopt_name_len_max = len(yopt.lname)
 	elif (ls[0] == "int"):
@@ -518,27 +515,31 @@ yopt_indent = "     "
 yopt_el = yopt_align + "\"\\n\"\n"
 
 yopt_str += yopt_align + "\"" + yopt_indent + yname
-if yopt_has_arg:
-	yopt_str += " <%s>" % yopt_has_arg.lname
+for yopt in yopts:
+	if yopt.otype != opt_argument:
+		continue
+	if opt_deprecated(yopt):
+		continue
+
+	yopt_str += " <%s>" % yopt.lname
+
 yopt_str += " [<options>]\\n\"\n"
 yopt_str += yopt_el
 
 # "Arguments" block
-if yopt_has_arg:
-	for yopt in yopts:
-		if (yopt.otype != opt_argument):
-			continue
-		if opt_deprecated(yopt):
-			continue
+for yopt in yopts:
+	if (yopt.otype != opt_argument):
+		continue
+	if opt_deprecated(yopt):
+		continue
 
-		yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
-		if len(yopt.choice) > 0:
-			for ch in yopt.choice:
-				yopt_str += yopt_align + "\"" + yopt_indent + \
-					    ch.val.ljust(10 + yopt_name_len_max) + \
-					    ch.summary + "\\n\"\n"
-
-yopt_str += yopt_el
+	yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
+	if len(yopt.choice) > 0:
+		for ch in yopt.choice:
+			yopt_str += yopt_align + "\"" + yopt_indent + \
+				    ch.val.ljust(10 + yopt_name_len_max) + \
+				    ch.summary + "\\n\"\n"
+	yopt_str += yopt_el
 
 # "Options" block
 def yopt_argname(yopt, dflt):
