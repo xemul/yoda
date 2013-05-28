@@ -91,3 +91,39 @@ option	fast
 option	skip-umount
 	bool	don't umount ct's filesystem
 	for	command = stop | command = restart
+
+# Dump/restore options
+
+option	dump
+	bool	only dump container's state
+	for	command = suspend
+
+option	suspend
+	bool	only suspend container
+	for	command = suspend
+
+option	undump
+	bool	only undump state
+	for	command = resume
+
+set	for	command = suspend | command = resume
+
+option	resume
+	bool	only resume suspended container
+
+option	kill
+	bool	kill suspended container
+
+option	skip_arpdetect
+	bool	don't send arp announcement
+
+option	flags
+	int	cpu flags
+
+option	context
+	int	cpt ConTeXt
+
+option	dumpfile
+	string	PATH to dump file
+
+unset	for
