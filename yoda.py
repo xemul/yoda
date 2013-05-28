@@ -320,6 +320,13 @@ for yopt in yopts:
 yincode = yincode.replace("${SOPTS}", yopt_str)
 
 # Generate and put long options array
+
+def opt_cassign(yopt):
+	if getattr(yopt, "sname", None):
+		return "'%s'" % yopt.sname
+	else:
+		return "%d" % yopt.sname_nr
+
 yopt_str = ""
 for yopt in yopts:
 	if yopt.otype != opt_option:
@@ -332,11 +339,7 @@ for yopt in yopts:
 	else:
 		yopt_rarg = "no_argument"
 
-	if getattr(yopt, "sname", None):
-		yopt_sopt = "'%s'" % yopt.sname
-	else:
-		yopt_sopt = "%d" % yopt.sname_nr
-
+	yopt_sopt = opt_cassign(yopt)
 	lnames = getattr(yopt, "laliases", [])
 	lnames.insert(0, yopt.lname)
 
@@ -359,11 +362,7 @@ for yopt in yopts:
 	if yopt_str:
 		yopt_str += "\n\t\t"
 
-	if getattr(yopt, "sname", None):
-		yopt_str += "case '%s':\n" % yopt.sname
-	else:
-		yopt_str += "case %d:\n" % yopt.sname_nr
-
+	yopt_str += "case %s:\n" % opt_cassign(yopt)
 	yopt_vassign = opt_sname(yopt)
 	if yopt.need_dup_trick:
 		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
