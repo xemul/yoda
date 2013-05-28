@@ -3,7 +3,7 @@ arg	command
 	choice	create		create a container
 	choice	start		start a container
 	choice	stop		stop a container
-	choice	destroy		destroy a container
+	choice	destroy/delete	destroy a container
 	choice	mount		mount container's filesystem
 	choice	umount		umount container's filesystem
 	choice	restart		restart a container
@@ -16,9 +16,58 @@ arg	command
 	choice	exec		execute a commaind inside container
 	choice	exec2		the same, but ...
 	choice	runscript	?
-	choice	suspent/chkpnt	suspend a container
+	choice	suspend/chkpnt	suspend a container
 	choice	resume/restore	resume container after suspend
 	choice	set		configure container's parameters
 
 arg	ctid
 	int	container ID
+
+option	verbose
+	bool	increase verbosity
+
+option	quiet
+	bool	don't print anything on the screen
+
+option	skiplock
+	bool	don't lock container
+
+set	for	command = create
+
+option	ostemplate
+	string	TeMPLate to use
+
+option	config
+	string	config FILE to create with
+
+option	private
+	string	PATH to private area
+
+option	root
+	string	PATH to root directory
+
+option	ipadd
+	string	ip ADDRess to assign
+
+option	hostname
+	string	hostname to assign
+
+option	name
+	string	container's name
+
+option	description
+	string	container's description
+
+option	layout
+	string	layout of private area
+
+option	diskspace
+	string	disk space
+
+option	local-uid
+	string	?
+
+option	local-gid
+	string	?
+
+unset	for
