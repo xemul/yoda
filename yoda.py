@@ -378,8 +378,16 @@ for yopt in yopts:
 	if yopt.otype != opt_argument:
 		continue
 
+	if yopt.atype == typ_string:
+		arg_assign = "*argv"
+	elif yopt.atype == typ_integer:
+		arg_assign = "yopt_parse_int(*argv)"
+	else:
+		print "Wrong type for an argument\n"
+		assert(False)
+
 	yopt_str += "if (argc) {\n\t"
-	yopt_str += "\t%s = *argv;\n\t" % opt_sname(yopt)
+	yopt_str += "\t%s = %s;\n\t" % (opt_sname(yopt), arg_assign)
 	yopt_str += "\tnext_arg();\n\t"
 
 	if not getattr(yopt, "defval", None):
