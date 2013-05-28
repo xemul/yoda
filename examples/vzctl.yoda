@@ -97,22 +97,27 @@ option	skip-umount
 option	dump
 	bool	only dump container's state
 	for	command = suspend
+	clash	suspend | resume | kill
 
 option	suspend
 	bool	only suspend container
 	for	command = suspend
+	clash	dump | resume | kill
 
 option	undump
 	bool	only undump state
 	for	command = resume
+	clash	resume | kill
 
 set	for	command = suspend | command = resume
 
 option	resume
 	bool	only resume suspended container
+	clash	dump | suspend | kill | undump
 
 option	kill
 	bool	kill suspended container
+	clash	dump | suspend | resume | undump
 
 option	skip_arpdetect
 	bool	don't send arp announcement

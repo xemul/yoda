@@ -141,6 +141,8 @@ for l in yfile:
 		yopt.required_for = ls[1]
 	elif (ls[0] == "for"):
 		yopt.optional_for = ls[1]
+	elif (ls[0] == "clash"):
+	  	yopt.conflicts = ls[1]
 	elif (ls[0] == "set"):
 		ls = ls[1].split(None, 1)
 		if ls[0] == "for":
@@ -522,7 +524,7 @@ for yopt in yopts:
 
 yincode = yincode.replace("${FIX_DUPS}", yopt_str)
 
-# Generate requirements checks (req_for-s)
+# Generate requirements checks (req_for-s and clash-es)
 
 yopt_str = ""
 for yopt in yopts:
@@ -540,6 +542,12 @@ for yopt in yopts:
 	if getattr(yopt, "optional_for", None):
 		yopt_str += "if (%s && !(%s))\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.optional_for))
 		yopt_str += "\tyopt_print(\"Option %s is useless\\n\");\n\n\t" % opt_pname(yopt)
+
+	if getattr(yopt, "conflicts", None):
+		yopt_str += "if (%s && (%s)) {\n\t\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
+		yopt_str += "yopt_err = YOPTS_PARSE_ERR;\n\t\t"
+		yopt_str += "yopt_print(\"Option %s conflict\\n\");\n\t" % opt_pname(yopt)
+		yopt_str += "}\n\t"
 
 yincode = yincode.replace("${CHECK_REQS}", yopt_str)
 
