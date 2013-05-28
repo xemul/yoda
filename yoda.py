@@ -64,6 +64,8 @@ def yopt_find_s(s):
 	else:
 	 	return None
 
+sopt_rover = 50
+
 for l in yfile:
 	if (l.startswith("#")):
 		continue
@@ -94,6 +96,10 @@ for l in yfile:
 
 		if len(ln):
 			yopt.laliases = ln
+
+		if not getattr(yopt, "sname", None):
+			yopt.sname_nr = sopt_rover
+			sopt_rover += 1
 
 		if def_for:
 			yopt.optional_for = def_for
@@ -172,6 +178,9 @@ yopt.atype = typ_boolean
 yopt.summary = "show help text"
 if "h" in std_shorts:
 	yopt.sname = "h"
+else:
+	yopt.sname_nr = sopt_rover
+	sopt_rover += 1
 
 yopts.append(yopt)
 
@@ -185,6 +194,9 @@ if "v" in std_shorts:
 	yopt.sname = "v"
 elif "V" in std_shorts:
 	yopt.sname = "V"
+else:
+	yopt.sname_nr = sopt_rover
+	sopt_rover += 1
 
 yopts.append(yopt)
 
@@ -309,7 +321,6 @@ yincode = yincode.replace("${SOPTS}", yopt_str)
 
 # Generate and put long options array
 yopt_str = ""
-sopt_rover = 50
 for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
@@ -324,8 +335,6 @@ for yopt in yopts:
 	if getattr(yopt, "sname", None):
 		yopt_sopt = "'%s'" % yopt.sname
 	else:
-		yopt.sname_nr = sopt_rover
-		sopt_rover += 1
 		yopt_sopt = "%d" % yopt.sname_nr
 
 	lnames = getattr(yopt, "laliases", [])
