@@ -58,7 +58,7 @@ option	name
 option	description
 	string	container's description
 
-option	layout
+option	layout//ve_layout/velayout
 	string	layout of private area
 
 option	diskspace
