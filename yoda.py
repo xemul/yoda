@@ -494,6 +494,31 @@ def yoda_gen_cexpression(exp_str):
 	else:
 		return "(%s)" % ret_str
 
+def yoda_get_group_desc(exp_str):
+	gacts = {}
+	exps = exp_str.split("|")
+	for exp in exps:
+		parts = map(lambda a: a.strip(), exp.split("="))
+
+		if len(parts) == 1:
+			parts = ['option', parts[0]]
+
+		if not gacts.has_key(parts[0]):
+			gacts[parts[0]] = []
+		gacts[parts[0]].append(parts[1])
+
+	gstr = ""
+	for t in gacts:
+		if gstr:
+			gstr += " or "
+		gstr += "for "
+		gstr += " or ".join(gacts[t])
+		gstr += " %s" % t
+		if len(gacts[t]) > 1:
+			gstr += "s"
+
+	return gstr.capitalize()
+
 
 # Generate dups fixups
 yopt_str = ""
@@ -607,38 +632,92 @@ def yopt_argname(yopt, dflt):
 	return len(s) and s or dflt
 
 yopt_str += yopt_align + "\"Options:\\n\"\n"
+
+yopts_groups = {}
+yopts_default = []
+yopts_generic = []
+
+# Classify options
 for yopt in yopts:
 	if yopt.otype != opt_option:
 		continue
 	if opt_deprecated(yopt):
 		continue
 
-	opts = []
-	if getattr(yopt, "sname", None):
-		opts.append("-%s" % yopt.sname)
-	if getattr(yopt, "lname", None):
-		opts.append("--%s" % yopt.lname)
+	for_expr = []
 
-	yopt_sub_str = "|".join(opts)
+	if getattr(yopt, "required_for", None):
+		for_expr.append(yopt.required_for)
+	if getattr(yopt, "optional_for", None):
+		for_expr.append(yopt.optional_for)
 
-	if yopt.atype == typ_integer:
-		yopt_sub_str += " " + yopt_argname(yopt, "NUM")
-	elif yopt.atype == typ_string:
-		yopt_sub_str += " " + yopt_argname(yopt, "STR")
+	if not for_expr:
+		yopts_generic.append(yopt)
+		continue
 
-	yopt_str += yopt_align + "\"" + yopt_indent + \
-		    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
-		    yopt.summary.lower() + "\\n\"" + "\n"
+	for_expr = " | ".join(for_expr)
 
-	if len(yopt.choice) > 0:
-		for ch in yopt.choice:
-			if len(ch.summary):
-				yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
-			else:
-				yopt_sub_str = "%s" % ch.val
-			yopt_str += yopt_align + "\"" + yopt_indent + \
-				    "".ljust(10 + yopt_name_len_max) + \
-				    yopt_indent + yopt_sub_str + "\\n\"\n"
+	if yopts_groups.has_key(for_expr):
+		yopts_groups[for_expr].append(yopt)
+	else:
+		yopts_groups[for_expr] = [yopt]
+
+# convert dict to list and sort it
+yopts_groups = map(lambda k: (k, yopts_groups[k]), yopts_groups)
+yopts_groups.sort(lambda a, b: len(a[1]) < len(b[1]) and 1 or -1)
+
+i = 0
+while i < len(yopts_groups):
+	yopt = yopts_groups[i];
+	if len(yopt[1]) > 2:
+		i += 1
+		continue
+	# merge a group, which contains less than three options
+	yopts_groups.remove(yopt)
+	for g in yopts_groups:
+		if set(yopt[0].split(" | ")).issubset(set(g[0].split(" | "))):
+			g[1].extend(yopt[1])
+			break
+	else:
+		yopts_default.extend(yopt[1])
+
+yopts_groups = map(lambda k: (yoda_get_group_desc(k[0]), k[1]), yopts_groups)
+yopts_groups.append(("Generic", yopts_generic))
+yopts_groups.append(("Other", yopts_default))
+
+for group in yopts_groups:
+	yopt_str += yopt_align + "\"\\n\"\n"
+	yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
+	for yopt in group[1]:
+		if yopt.otype != opt_option:
+			continue
+
+		opts = []
+		if getattr(yopt, "sname", None):
+			opts.append("-%s" % yopt.sname)
+		if getattr(yopt, "lname", None):
+			opts.append("--%s" % yopt.lname)
+
+		yopt_sub_str = "|".join(opts)
+
+		if yopt.atype == typ_integer:
+			yopt_sub_str += " " + yopt_argname(yopt, "NUM")
+		elif yopt.atype == typ_string:
+			yopt_sub_str += " " + yopt_argname(yopt, "STR")
+
+		yopt_str += yopt_align + "\"" + yopt_indent + \
+			    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
+			    yopt.summary.lower() + "\\n\"" + "\n"
+
+		if len(yopt.choice) > 0:
+			for ch in yopt.choice:
+				if len(ch.summary):
+					yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
+				else:
+					yopt_sub_str = "%s" % ch.val
+				yopt_str += yopt_align + "\"" + yopt_indent + \
+					    "".ljust(10 + yopt_name_len_max) + \
+					    yopt_indent + yopt_sub_str + "\\n\"\n"
 
 yincode = yincode.replace("${USAGE}", yopt_str)
 
