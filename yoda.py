@@ -682,7 +682,7 @@ while i < len(yopts_groups):
 		yopts_default.extend(yopt[1])
 
 yopts_groups = map(lambda k: (yoda_get_group_desc(k[0]), k[1]), yopts_groups)
-yopts_groups.append(("Generic", yopts_generic))
+yopts_groups.insert(0, ("Generic", yopts_generic))
 yopts_groups.append(("Other", yopts_default))
 
 for group in yopts_groups:
