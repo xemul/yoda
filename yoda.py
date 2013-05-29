@@ -87,7 +87,7 @@ for l in yfile:
 		yopt.lname = ln.pop(0)
 		yex = yopt_find_l(yopt.lname)
 		if yex:
-			print "Duplicate option name"
+			print "Duplicate option name %s\n" % yopt.lname
 			assert(False)
 
 		if len(ln):
