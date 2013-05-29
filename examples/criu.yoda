@@ -57,31 +57,37 @@ option	port
 	int		PORT of page server
 	req_for		page-server | action = page-server
 
+# Options for "special resources handing"
+
+set	for		action = dump | action = pre-dump | action = restore
+
 option	ext-unix-sk/x
 	bool		allow external unix connections
 
 option	tcp-established
 	bool		checkpoint/restore established TCP connections
 
-option	root/r
-	string		change the ROOT filesystem (when run in mount namespace)
-	for		action = restore
-
 option	evasive-devices
 	bool		use any path to a device file if the original one is inaccessible
-
-option	veth-pair
-	string		map inside veth device name to outside one
-	for		action = restore
-
-option	link-remap
-	bool		allow to link unlinked files back when possible
 
 option	shell-job/j
 	bool		allow to dump and restore shell jobs
 
 option	file-locks/l
 	bool		handle file locks, for safety, only used for container
+
+option	link-remap
+	bool		allow to link unlinked files back when possible
+
+unset	for
+
+option	root/r
+	string		change the ROOT filesystem (when run in mount namespace)
+	for		action = restore
+
+option	veth-pair
+	string		map inside veth device name to outside one
+	for		action = restore
 
 option	log-file/o
 	string		log FILE name (path is relative to --images-dir)
