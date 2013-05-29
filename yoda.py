@@ -667,9 +667,10 @@ yopts_groups = map(lambda k: (k, yopts_groups[k]), yopts_groups)
 yopts_groups.sort(lambda a, b: len(a[1]) < len(b[1]) and 1 or -1)
 
 i = 0
+ygroup_merge_thresh = 3
 while i < len(yopts_groups):
 	yopt = yopts_groups[i];
-	if len(yopt[1]) > 2:
+	if len(yopt[1]) >= ygroup_merge_thresh:
 		i += 1
 		continue
 	# merge a group, which contains less than three options
