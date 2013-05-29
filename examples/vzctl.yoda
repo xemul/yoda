@@ -40,18 +40,6 @@ option	ostemplate
 option	config
 	string	config FILE to create with
 
-option	private
-	string	PATH to private area
-
-option	root
-	string	PATH to root directory
-
-option	ipadd
-	string	ip ADDRess to assign
-
-option	hostname
-	string	hostname to assign
-
 option	name
 	string	container's name
 
@@ -72,9 +60,26 @@ option	local-gid
 
 unset	for
 
+option	ipadd//ip
+	string	ip ADDRess to assign
+	for	command = create | command = set
+
+option	hostname
+	string	hostname to assign
+	for	command = create | command = set
+
+option	private
+	string	PATH to private area
+	for	command = create | command = set
+
+option	root
+	string	PATH to root directory
+	for	command = create | command = set
+
+
 option	force
 	bool	forced stop
-	for	command = stop | command = restart
+	for	command = stop | command = restart | command = set
 
 option	skip_ve_setup
 	bool	don't run ve configuration scripts
@@ -119,9 +124,6 @@ option	kill
 	bool	kill suspended container
 	clash	dump | suspend | resume | undump
 
-option	skip_arpdetect
-	bool	don't send arp announcement
-
 option	flags
 	int	cpu flags
 
@@ -130,5 +132,129 @@ option	context
 
 option	dumpfile
 	string	PATH to dump file
+
+unset	for
+
+option	skip_arpdetect
+	bool	don't send arp announcement
+	for	command = suspend | command = resume | command = set
+
+# The most impressive set of options -- for set command
+
+set	for	command = set
+
+option	save
+	bool	save changes into config file
+
+option	applyconfig
+	string	apply options from config FILE
+
+option	applyconfig_map
+	string	???
+
+option	reset_ub
+	bool	apply user-beancounters parameters from config
+
+option	iptables
+	string	LiST of iptables modules to use
+
+option	kmemsize/k
+	int	set kmemsize resource
+
+option	lockedpages/l
+	int	set lockedpages resource
+
+option	privvmpages
+	int	set privvmpages resource
+
+option	shmpages
+	int	set shmpages resource
+
+option	numproc/p
+	int	set number of processes
+
+option	physpages
+	int	set physpages resource
+
+option	vmguarpages
+	int	set vmguarpages resource
+
+option	oomguarpages
+	int	set oomguarpages resource
+
+option	numtcpsock
+	int	set number of tcp sockets
+
+option	numflock
+	int	set number of file locks
+
+option	numpty/t
+	int	set number of ttys
+
+option	numsiginfo/i
+	int	set number of siginfos
+
+option	tcpsndbuf
+	int	set tcp send buffer limit
+
+option	tcprcvbuf/b
+	int	set tcp receive buffer limit
+
+option	othersockbuf
+	int	set other sockets buffers limit
+
+option	dgramrcvbuf
+	int	set udp recv buffer limit
+
+option	numothersock
+	int	set number of non-tcp sockets
+
+option	numfile/n
+	int	set number of files
+
+option	dcachesize/x
+	int	set dentry cache size limit
+
+option	numiptent/e
+	int	set number of iptables entries
+
+option	avnumproc
+	int
+
+option	swappages
+	int	swap limit
+
+option	capability
+	string	LiST of capabilities
+
+option	ipdel
+	string	del an ip ADDRess from container
+
+option	netdev_add
+	string	add a network DEVice to container
+
+option	netdev_del
+	string	del a network DEVice from container
+
+option	nameserver
+	string	set nameserver ADDRess
+
+option	searchdomain
+	string	set dns search domain ADDRess
+
+option	userpasswd
+	string	configure user password
+
+option	devnodes
+	string	add a device to container and grant permissions to it
+
+option	devices
+	string	grant device permissions to container
+
+option	pci_add
+	string	add pci DEVice to container
+
+option	pci_del
+	string	del pci DEVice from container
 
 unset	for
