@@ -73,8 +73,8 @@ option	local-gid
 unset	for
 
 option	force
-	bool	forced start
-	for	command = start | command = restart
+	bool	forced stop
+	for	command = stop | command = restart
 
 option	skip_ve_setup
 	bool	don't run ve configuration scripts
