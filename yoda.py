@@ -692,13 +692,15 @@ for group in yopts_groups:
 		if yopt.otype != opt_option:
 			continue
 
-		opts = []
+		delim = False
 		if getattr(yopt, "sname", None):
-			opts.append("-%s" % yopt.sname)
+			yopt_sub_str = "-%s" % yopt.sname
+			delim = True
+		else:
+			yopt_sub_str = "  "
 		if getattr(yopt, "lname", None):
-			opts.append("--%s" % yopt.lname)
-
-		yopt_sub_str = "|".join(opts)
+			yopt_sub_str += (delim and ", " or "  ")
+			yopt_sub_str += "--%s" % yopt.lname
 
 		if yopt.atype == typ_integer:
 			yopt_sub_str += " " + yopt_argname(yopt, "NUM")
