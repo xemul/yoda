@@ -97,6 +97,8 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		return yopt_err;
 
 	yopt_err = ${PROJ}_yopts_check_reqs();
+	if (yopt_err)
+		return yopt_err;
 
 	return YOPTS_PARSE_OK;
 }
