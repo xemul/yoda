@@ -82,11 +82,9 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc) {
-		yopt_err = ${PROJ}_yopts_parse_args(argc, argv);
-		if (yopt_err)
-			return yopt_err;
-	}
+	yopt_err = ${PROJ}_yopts_parse_args(argc, argv);
+	if (yopt_err)
+		return yopt_err;
 
 	yopt_err = ${PROJ}_yopts_fixup_dups();
 	if (yopt_err)
