@@ -383,6 +383,7 @@ for yopt in yopts:
 	elif yopt.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(optarg)"
 
+	yopt_str += "\t\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
 	if not yopt.need_dup_trick:
 		for dup in yopt.short_dups:
@@ -406,6 +407,7 @@ for yopt in yopts:
 		assert(False)
 
 	yopt_str += "if (argc) {\n\t"
+	yopt_str += "\tdprint(\"%s assigned to %%s\\n\", *argv);\n\t" % opt_sname(yopt)
 	yopt_str += "\t%s = %s;\n\t" % (opt_sname(yopt), arg_assign)
 	yopt_str += "\tnext_arg();\n\t"
 

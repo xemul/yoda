@@ -6,6 +6,21 @@
 #include <stdarg.h>
 #include "${PROJ}_yopts.h"
 
+#ifdef YDEBUG
+#define dprint	printf
+int main(int argc, char **argv)
+{
+	int ret;
+
+	ret = ${PROJ}_yopts_parse(argc, argv);
+	printf("Parser returned %d\n", ret);
+
+	return ret;
+}
+#else
+#define dprint(...)
+#endif
+
 struct yopts ${PROJ}_yopts = { };
 static int ${PROJ}_yopts_usage(char *prog, int ret);
 static int ${PROJ}_yopts_fixup_dups(void);
