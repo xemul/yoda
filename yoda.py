@@ -66,7 +66,7 @@ def yopt_find_s(s):
 
 def next_rover(rover):
 	rover += 1
-	while chr(rover).isalnum():
+	while chr(rover).isalnum() or (chr(rover) == '?'):
 		rover += 1
 	return rover
 
