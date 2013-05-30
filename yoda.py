@@ -92,13 +92,14 @@ for l in yfile:
 
 		if len(ln):
 			yopt.sname = ln.pop(0)
-			yex = yopt_find_s(yopt.sname)
-			if yex:
-				yopt.short_dup = yex
-				yex.short_dups.append(yopt)
+			if yopt.sname:
+				yex = yopt_find_s(yopt.sname)
+				if yex:
+					yopt.short_dup = yex
+					yex.short_dups.append(yopt)
 
-			if yopt.sname in std_shorts:
-				std_shorts.remove(yopt.sname)
+				if yopt.sname in std_shorts:
+					std_shorts.remove(yopt.sname)
 
 		if len(ln):
 			yopt.laliases = ln
