@@ -127,3 +127,7 @@ option	ms
 option	namespaces/n
 	string
 	for		action = restore
+
+option	action-script
+	string		hooks to call on various events
+	pile
