@@ -17,6 +17,8 @@
 #
 
 import sys
+import os
+import argparse
 
 opt_option = 1
 opt_argument = 2
@@ -36,9 +38,21 @@ class yoption:
 class ychoice:
 	pass
 
+#
+# Our own command line
+arg_parser = argparse.ArgumentParser()
+arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse", type=str)
+arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
+arg_parser.add_argument("-d", "--dir", default="./", help="templates directory", type=str)
+arg_opts = arg_parser.parse_args()
+
+if arg_opts.file == None or arg_opts.name == None:
+	arg_parser.print_help()
+	sys.exit(1)
+
 # Read yoda file in
 
-yfile = open(sys.argv[1])
+yfile = open(arg_opts.file)
 
 yopts = []
 yopt_name_len_max = 0
@@ -252,7 +266,7 @@ yopts.append(yopt)
 #
 ##
 
-yname = sys.argv[2];
+yname = arg_opts.name;
 
 ctypes = {
 	typ_boolean:	"bool",
@@ -301,7 +315,7 @@ def opt_deprecated(yopt):
 # Generate the .h file
 #
 
-yinfile = open("yopts.h.in")
+yinfile = open(os.path.join(arg_opts.dir, "yopts.h.in"))
 yincode = yinfile.read()
 yincode = yincode.replace("${PROJ}", yname)
 
@@ -351,7 +365,7 @@ youtfile.close()
 #
 
 # Get the template in
-yinfile = open("yopts.c.in")
+yinfile = open(os.path.join(arg_opts.dir, "yopts.c.in"))
 yincode = yinfile.read()
 yincode = yincode.replace("${PROJ}", yname)
 
