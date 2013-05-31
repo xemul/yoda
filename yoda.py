@@ -158,6 +158,8 @@ for l in yfile:
 		yopt.optional_for = ls[1]
 	elif (ls[0] == "clash"):
 	  	yopt.conflicts = ls[1]
+	elif (ls[0] == "optarg"):
+		yopt.optarg = ls[1]
 	elif (ls[0] == "set"):
 		ls = ls[1].split(None, 1)
 		if ls[0] == "for":
@@ -342,7 +344,10 @@ for yopt in yopts:
 	if yopt.need_dup_trick:
 		yopt_str += "::"
 	elif yopt.atype != typ_boolean:
-		yopt_str += ":"
+		if getattr(yopt, "optarg", None):
+			yopt_str += "::"
+		else:
+			yopt_str += ":"
 
 yincode = yincode.replace("${SOPTS}", yopt_str)
 
@@ -362,7 +367,10 @@ for yopt in yopts:
 		continue
 
 	if yopt.atype != typ_boolean:
-		yopt_rarg = "required_argument"
+		if getattr(yopt, "optarg", None):
+			yopt_rarg = "optional_argument"
+		else:
+			yopt_rarg = "required_argument"
 	else:
 		yopt_rarg = "no_argument"
 
@@ -379,6 +387,14 @@ for yopt in yopts:
 yincode = yincode.replace("${LOPTS}", yopt_str)
 
 # Generate options assignment
+def optarg_assign(yopt):
+	if yopt.atype == typ_string:
+		return "\"%s\"" % yopt.optarg
+	elif yopt.optarg.startswith("+"):
+		return "%s %s" % (opt_sname(yopt), yopt.optarg)
+	else:
+		return yopt.optarg
+
 yopt_str = ""
 for yopt in yopts:
 	if yopt.otype != opt_option:
@@ -400,6 +416,9 @@ for yopt in yopts:
 		yopt_assign = "optarg"
 	elif yopt.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(optarg)"
+
+	if getattr(yopt, "optarg", None):
+		yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
 
 	yopt_str += "\t\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)

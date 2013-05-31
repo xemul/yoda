@@ -50,6 +50,7 @@ option	/v
 	choice		3 information
 	choice		4 debug
 	default		2
+	optarg		+1
 
 option	address
 	string		ADDRess of page server
