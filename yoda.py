@@ -44,6 +44,7 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse", type=str)
 arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
 arg_parser.add_argument("-d", "--dir", default="./", help="templates directory", type=str)
+arg_parser.add_argument("-o", "--output", required=False, help="generate C parser into <h>:<c> files", type=str)
 arg_opts = arg_parser.parse_args()
 
 if arg_opts.file == None or arg_opts.name == None:
@@ -268,6 +269,11 @@ yopts.append(yopt)
 
 yname = arg_opts.name;
 
+if arg_opts.output:
+	c_files = arg_opts.output.split(":")
+else:
+	c_files = [ "%s_yopts.h" % yname, "%s_yopts.c" % yname ]
+
 ctypes = {
 	typ_boolean:	"bool",
 	typ_integer:	"int",
@@ -355,7 +361,7 @@ for yopt in yopts:
 yincode = yincode.replace("${CHOICES}", yopt_str)
 
 # Commit the code into .h file
-youtfile = open(yname + "_yopts.h", "w")
+youtfile = open(c_files[0], "w")
 youtfile.write(yincode)
 yinfile.close()
 youtfile.close()
@@ -828,7 +834,7 @@ for group in yopts_groups:
 yincode = yincode.replace("${USAGE}", yopt_str)
 
 # Commit the code into .c file
-youtfile = open(yname + "_yopts.c", "w")
+youtfile = open(c_files[1], "w")
 youtfile.write(yincode)
 
 yinfile.close()
