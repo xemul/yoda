@@ -91,6 +91,7 @@ option	root/r
 option	veth-pair
 	string		map inside veth device name to outside one
 	for		action = restore
+	pile
 
 option	log-file/o
 	string		log FILE name (path is relative to --images-dir)

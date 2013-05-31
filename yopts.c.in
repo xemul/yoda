@@ -41,6 +41,22 @@ __attribute__((weak)) void yopt_print(const char *format, ...)
         va_end(params);
 }
 
+__attribute__((weak)) void *yopt_realloc(void *ptr, unsigned long size)
+{
+	return realloc(ptr, size);
+}
+
+static void *yopt_realloc_mem(void *ptr, unsigned long size)
+{
+	void *ret;
+
+	ret = yopt_realloc(ptr, size);
+	if (!ret)
+		yopt_err = YOPTS_PARSE_ERR;
+
+	return ret;
+}
+
 static unsigned int yopt_parse_int(char *str)
 {
 	char *aux;

@@ -30,6 +30,7 @@ class yoption:
 		self.choice = []
 		self.short_dups = []
 		self.otype = otype
+		self.pile = def_pile
 	pass
 
 class ychoice:
@@ -46,6 +47,7 @@ std_shorts = set(["v", "V", "h"])
 
 def_for = None
 def_req_for = None
+def_pile = False
 
 def yopt_find_l(s):
 	if not s:
@@ -160,12 +162,16 @@ for l in yfile:
 	  	yopt.conflicts = ls[1]
 	elif (ls[0] == "optarg"):
 		yopt.optarg = ls[1]
+	elif (ls[0] == "pile"):
+		yopt.pile = True
 	elif (ls[0] == "set"):
 		ls = ls[1].split(None, 1)
 		if ls[0] == "for":
 			def_for = ls[1]
 		elif ls[0] == "req_for":
 			def_req_for = ls[1]
+		elif ls[0] == "pile":
+			def_pile = True
 		else:
 		 	print "Unknown set", ls[0]
 	elif (ls[0] == "unset"):
@@ -173,6 +179,8 @@ for l in yfile:
 			def_for = None
 		elif ls[1] == "req_for":
 			def_req_for = None
+		elif ls[1] == "pile":
+			def_pile = False
 		else:
 		 	print "Unknown unset", ls[0]
 	else:
@@ -273,7 +281,13 @@ yincode = yincode.replace("${PROJ}", yname)
 # Generate the yopts structure
 yopt_str = ""
 for yopt in yopts:
-	yopt_str += "%s %s;\n\t" % (ctypes[yopt.atype], opt_cname(yopt))
+	if yopt.pile:
+		yopt_str += "%s %s_nr;\n\t" % (ctypes[typ_integer], opt_cname(yopt))
+		pf = "*"
+	else:
+		pf = ""
+
+	yopt_str += "%s%s %s;\n\t" % (ctypes[yopt.atype], pf, opt_cname(yopt))
 	# For non ints with choice generate numerical constants
 	# for faster comparisons in the code
 	if len(yopt.choice) and (yopt.atype != typ_integer):
@@ -410,6 +424,9 @@ for yopt in yopts:
 
 	yopt_str += "case %s:\n" % opt_cassign(yopt)
 	yopt_vassign = opt_sname(yopt)
+	if yopt.pile:
+		yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
+
 	if yopt.need_dup_trick:
 		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
@@ -424,6 +441,10 @@ for yopt in yopts:
 		yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
 
 	yopt_str += "\t\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
+	if yopt.pile:
+		yopt_str += "\t\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
+			     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
+		yopt_str += "\t\t\tif (%s)\n\t" % opt_sname(yopt)
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
 	if not yopt.need_dup_trick:
 		for dup in yopt.short_dups:
