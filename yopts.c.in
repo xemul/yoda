@@ -21,7 +21,10 @@ int main(int argc, char **argv)
 #define dprint(...)
 #endif
 
-struct yopts ${PROJ}_yopts = { };
+struct yopts ${PROJ}_yopts = {
+	${DEFAULTS}
+};
+
 static int ${PROJ}_yopts_usage(char *prog, int ret);
 static int ${PROJ}_yopts_fixup_dups(void);
 static int ${PROJ}_yopts_fixup_choices(void);

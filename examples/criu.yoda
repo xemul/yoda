@@ -18,6 +18,7 @@ option	pid/p
 
 option	images-dir/D
 	string		DIRectory with images
+	default		.
 
 option	page-server
 	bool		use page server for pages images
@@ -48,6 +49,7 @@ option	/v
 	choice		2 warnings
 	choice		3 information
 	choice		4 debug
+	default		2
 
 option	address
 	string		ADDRess of page server

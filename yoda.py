@@ -312,6 +312,24 @@ yinfile = open("yopts.c.in")
 yincode = yinfile.read()
 yincode = yincode.replace("${PROJ}", yname)
 
+# Generate default values
+yopt_str = ""
+for yopt in yopts:
+	if not getattr(yopt, "defval", None):
+		continue
+
+	if yopt_str:
+		yopt_str += "\t"
+
+	if yopt.atype == typ_string:
+		yassig = "\"%s\"" % yopt.defval
+	elif yopt.atype == typ_integer:
+		yassig = "%s" % yopt.defval
+
+	yopt_str += ".%s = %s,\n" % (opt_cname(yopt), yassig)
+
+yincode = yincode.replace("${DEFAULTS}", yopt_str)
+
 # Generate and put short options array
 yopt_str = ""
 for yopt in yopts:
@@ -411,11 +429,9 @@ for yopt in yopts:
 	yopt_str += "\t%s = %s;\n\t" % (opt_sname(yopt), arg_assign)
 	yopt_str += "\tnext_arg();\n\t"
 
-	if not getattr(yopt, "defval", None):
-		yopt_str += "} else {\n\t"
-		yopt_str += "\tyopt_print(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
-
+	yopt_str += "} else {\n\t"
+	yopt_str += "\tyopt_print(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
+	yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
 	yopt_str += "}\n\t"
 
 yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
