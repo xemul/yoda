@@ -1,3 +1,5 @@
+set	auto-dash-alias
+
 arg	command
 	string	command to execute
 	choice	create		create a container

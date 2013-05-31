@@ -48,6 +48,7 @@ std_shorts = set(["v", "V", "h"])
 def_for = None
 def_req_for = None
 def_pile = False
+auto_alias_dashed = False
 
 def yopt_find_l(s):
 	if not s:
@@ -71,6 +72,14 @@ def next_rover(rover):
 	while chr(rover).isalnum() or (chr(rover) == '?'):
 		rover += 1
 	return rover
+
+def make_dash_alias(name):
+	if "-" in name:
+		return name.replace("-", "_")
+	elif "_" in name:
+		return name.replace("_", "-")
+	else:
+		return None
 
 sopt_rover = next_rover(0)
 
@@ -105,6 +114,21 @@ for l in yfile:
 
 		if len(ln):
 			yopt.laliases = ln
+
+		if auto_alias_dashed:
+			als = []
+			al = make_dash_alias(yopt.lname)
+			if al:
+				als.append(al)
+			if getattr(yopt, "laliases", None):
+				for al in yopt.laliases:
+					als.append(al)
+					al = make_dash_alias(al)
+					if al:
+						als.append(al)
+
+			if len(als):
+				yopt.laliases = als
 
 		if not getattr(yopt, "sname", None):
 			yopt.sname_nr = sopt_rover
@@ -172,6 +196,9 @@ for l in yfile:
 			def_req_for = ls[1]
 		elif ls[0] == "pile":
 			def_pile = True
+		elif ls[0] == "auto-dash-alias":
+			assert(len(yopts) == 0)
+			auto_alias_dashed = True
 		else:
 		 	print "Unknown set", ls[0]
 	elif (ls[0] == "unset"):
