@@ -27,6 +27,8 @@ typ_boolean = 1
 typ_integer = 2
 typ_string = 3
 
+generators = [ "cparser" ]
+
 class yoption:
 	def __init__(self, otype):
 		self.choice = []
@@ -44,6 +46,7 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse", type=str)
 arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
 arg_parser.add_argument("-d", "--dir", default="./", help="templates directory", type=str)
+arg_parser.add_argument("-g", "--generate", required=False, help="what to generate (%s)" % ", ".join(generators), type=str)
 arg_parser.add_argument("-o", "--output", required=False, help="generate C parser into <h>:<c> files", type=str)
 arg_opts = arg_parser.parse_args()
 
@@ -260,6 +263,18 @@ else:
 	sopt_rover = next_rover(sopt_rover)
 
 yopts.append(yopt)
+
+# FIXME -- add proper check here. Right now yoda can only generate C parser,
+#          so just check it and bail out if it's something else
+
+if not arg_opts.generate:
+	print "Nothing to generate"
+	sys.exit(0)
+
+if not arg_opts.generate in generators:
+	print "Can't generate %s, but can one of: %s" % \
+		(arg_opts.generate, ", ".join(generators))
+	sys.exit(0)
 
 ##
 #	
