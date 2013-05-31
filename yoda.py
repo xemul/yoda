@@ -47,7 +47,7 @@ arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse"
 arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
 arg_parser.add_argument("-d", "--dir", default="./", help="templates directory", type=str)
 arg_parser.add_argument("-g", "--generate", required=False, help="what to generate (%s)" % ", ".join(generators), type=str)
-arg_parser.add_argument("-o", "--output", required=False, help="generate C parser into <h>:<c> files", type=str)
+arg_parser.add_argument("-o", "--output", required=False, help="output file(s), separated with :", type=str)
 arg_opts = arg_parser.parse_args()
 
 if arg_opts.file == None or arg_opts.name == None:
