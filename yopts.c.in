@@ -90,7 +90,7 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		}
 
 		if (yopt_err)
-			return -1;
+			return yopt_err;
 	}
 
 	if (${PROJ}_yopts.help)
