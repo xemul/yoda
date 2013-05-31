@@ -314,6 +314,9 @@ yinfile = open("yopts.c.in")
 yincode = yinfile.read()
 yincode = yincode.replace("${PROJ}", yname)
 
+def cstrval(s):
+	return "\"%s\"" % s.strip("\"")
+
 # Generate default values
 yopt_str = ""
 for yopt in yopts:
@@ -324,7 +327,7 @@ for yopt in yopts:
 		yopt_str += "\t"
 
 	if yopt.atype == typ_string:
-		yassig = "\"%s\"" % yopt.defval
+		yassig = cstrval(yopt.defval)
 	elif yopt.atype == typ_integer:
 		yassig = "%s" % yopt.defval
 
@@ -389,7 +392,7 @@ yincode = yincode.replace("${LOPTS}", yopt_str)
 # Generate options assignment
 def optarg_assign(yopt):
 	if yopt.atype == typ_string:
-		return "\"%s\"" % yopt.optarg
+		return cstrval(yopt.optarg)
 	elif yopt.optarg.startswith("+"):
 		return "%s %s" % (opt_sname(yopt), yopt.optarg)
 	else:
