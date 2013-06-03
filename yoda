@@ -589,11 +589,15 @@ yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
 
 # Generate validation routine (choices)
 yopt_str = ""
-unknown_opt = "yopt_print(\"Unknown %s value %s\\n\", %s);"
 choice_assign_str = "\
 if (%s)\n\
 		%s_code = %s;\n\
 	else "
+
+opt_err_str = "\
+		yopt_print(\"Unknown %s value %s\\n\", %s);\n\
+		yopt_err = YOPTS_PARSE_ERR;\n\
+"
 
 for yopt in yopts:
 	if not len(yopt.choice):
@@ -607,17 +611,15 @@ for yopt in yopts:
 			cmps = " || ".join(cmps)
 			yopt_str += choice_assign_str % (cmps, opt_sname(yopt), ch.ccode)
 
-		yopt_str += "{\n\t\t" + unknown_opt % (opt_pname(yopt), "%s", opt_sname(yopt)) + "\n\t"
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t}\n\n\t"
+		yopt_str += "{\n%s\t}\n\n\t" % (opt_err_str % (opt_pname(yopt), "%s", opt_sname(yopt)))
 	elif yopt.atype == typ_integer:
 		yopt_str += "switch (%s) {\n\t" % opt_sname(yopt)
 		for ch in yopt.choice:
 			yopt_str += "case %s:\n\t" % ch.val
 		yopt_str += "\tbreak;\n\t"
-		yopt_str += "default:\n\t"
-		yopt_str += "\t" + unknown_opt % (opt_pname(yopt), "%d", opt_sname(yopt)) + "\n\t"
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
-		yopt_str += "\tbreak;\n\t"
+		yopt_str += "default:\n"
+		yopt_str += opt_err_str % (opt_pname(yopt), "%d", opt_sname(yopt))
+		yopt_str += "\t\tbreak;\n\t"
 		yopt_str += "}\n"
 
 yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
