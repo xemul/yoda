@@ -594,7 +594,7 @@ for yopt in yopts:
 	if not len(yopt.choice):
 		continue
 
-	if yopt.atype in (typ_string, typ_path):
+	if yopt.atype == typ_string:
 		for ch in yopt.choice:
 			yopt_str += "if (!strcmp(%s, \"%s\")" % (opt_sname(yopt), ch.val)
 			if getattr(ch, "aliases", None):
