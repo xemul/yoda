@@ -46,7 +46,7 @@ __attribute__((weak)) void *yopt_realloc(void *ptr, unsigned long size)
 	return realloc(ptr, size);
 }
 
-static void *yopt_realloc_mem(void *ptr, unsigned long size)
+static inline void *yopt_realloc_mem(void *ptr, unsigned long size)
 {
 	void *ret;
 
