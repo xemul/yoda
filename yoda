@@ -613,9 +613,9 @@ for yopt in yopts:
 
 		yopt_str += "{\n%s\t}\n\n\t" % (opt_err_str % (opt_pname(yopt), "%s", opt_sname(yopt)))
 	elif yopt.atype == typ_integer:
+		cases = map(lambda x: "case %s:\n\t" % x.val, yopt.choice)
 		yopt_str += "switch (%s) {\n\t" % opt_sname(yopt)
-		for ch in yopt.choice:
-			yopt_str += "case %s:\n\t" % ch.val
+		yopt_str += "".join(cases)
 		yopt_str += "\tbreak;\n\t"
 		yopt_str += "default:\n"
 		yopt_str += opt_err_str % (opt_pname(yopt), "%d", opt_sname(yopt))
