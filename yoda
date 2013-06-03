@@ -207,6 +207,8 @@ for l in yfile:
 		yopt.required_for = ls[1]
 	elif (ls[0] == "for"):
 		yopt.optional_for = ls[1]
+	elif (ls[0] == "hgroup"):
+		yopt.hgroup = ls[1]
 	elif (ls[0] == "clash"):
 		yopt.conflicts = ls[1]
 	elif (ls[0] == "optarg"):
@@ -807,10 +809,13 @@ for yopt in yopts:
 
 	for_expr = []
 
-	if getattr(yopt, "required_for", None):
-		for_expr.append(yopt.required_for)
-	if getattr(yopt, "optional_for", None):
-		for_expr.append(yopt.optional_for)
+	if getattr(yopt, "hgroup", None):
+		for_expr.append(yopt.hgroup)
+	else:
+		if getattr(yopt, "required_for", None):
+			for_expr.append(yopt.required_for)
+		if getattr(yopt, "optional_for", None):
+			for_expr.append(yopt.optional_for)
 
 	if not for_expr:
 		yopts_generic.append(yopt)
