@@ -507,6 +507,7 @@ for yopt in yopts:
 		yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
 
 	if yopt.need_dup_trick:
+		assert(not yopt.pile)
 		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
 	elif yopt.atype == typ_boolean:
@@ -527,6 +528,7 @@ for yopt in yopts:
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
 	if not yopt.need_dup_trick:
 		for dup in yopt.short_dups:
+			assert(not yopt.pile)
 			yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
 	yopt_str += "\t\t\tbreak;"
 
