@@ -79,14 +79,14 @@ def yopt_find_l(s):
 	if len(res):
 		return res[0]
 	else:
-	 	return None
+		return None
 
 def yopt_find_s(s):
 	res = filter(lambda x: getattr(x, "sname", None) == s, yopts)
 	if len(res):
 		return res[0]
 	else:
-	 	return None
+		return None
 
 def next_rover(rover):
 	rover += 1
@@ -207,7 +207,7 @@ for l in yfile:
 	elif (ls[0] == "for"):
 		yopt.optional_for = ls[1]
 	elif (ls[0] == "clash"):
-	  	yopt.conflicts = ls[1]
+		yopt.conflicts = ls[1]
 	elif (ls[0] == "optarg"):
 		yopt.optarg = ls[1]
 	elif (ls[0] == "pile"):
@@ -224,13 +224,13 @@ for l in yfile:
 			assert(len(yopts) == 0)
 			auto_alias_dashed = True
 		elif ls[0] == "short_help":
-		 	assert(len(yopts) == 0)
-		 	short_help = ls[1]
+			assert(len(yopts) == 0)
+			short_help = ls[1]
 		elif ls[0] == "short_version":
-		 	assert(len(yopts) == 0)
-		 	short_version = ls[1]
+			assert(len(yopts) == 0)
+			short_version = ls[1]
 		else:
-		 	print "Unknown set", ls[0]
+			print "Unknown set", ls[0]
 	elif (ls[0] == "unset"):
 		if ls[1] == "for":
 			def_for = None
@@ -239,7 +239,7 @@ for l in yfile:
 		elif ls[1] == "pile":
 			def_pile = False
 		else:
-		 	print "Unknown unset", ls[0]
+			print "Unknown unset", ls[0]
 	else:
 		print "Unknown keyword", ls[0]
 		sys.exit(1)
