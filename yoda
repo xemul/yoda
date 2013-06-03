@@ -412,7 +412,6 @@ for yopt in yopts:
 		continue
 
 	yopt_str += "enum {\n";
-	yopt_str += "\tYOPT_%s_DEFAULT,\n" %(opt_cname(yopt).upper())
 	for ch in yopt.choice:
 		ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
 		yopt_str += "\t%s,\n" % ch.ccode
