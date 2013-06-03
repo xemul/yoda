@@ -490,13 +490,12 @@ for yopt in yopts:
 	if not getattr(yopt, "lname", None):
 		continue
 
-	if yopt.atype != typ_boolean:
-		if getattr(yopt, "optarg", None):
-			yopt_rarg = "optional_argument"
-		else:
-			yopt_rarg = "required_argument"
-	else:
+	if yopt.atype == typ_boolean:
 		yopt_rarg = "no_argument"
+	elif getattr(yopt, "optarg", None):
+		yopt_rarg = "optional_argument"
+	else:
+		yopt_rarg = "required_argument"
 
 	yopt_sopt = opt_cassign(yopt)
 	lnames = getattr(yopt, "laliases", [])
