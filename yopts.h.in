@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 void yopt_print(const char *format, ...);
+extern int yopt_tail;
 
 #define	YOPTS_PARSE_OK		0
 #define	YOPTS_PARSE_ERR		-1

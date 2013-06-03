@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 	int ret;
 
 	ret = ${PROJ}_yopts_parse(argc, argv);
-	printf("Parser returned %d\n", ret);
+	printf("Parser returned %d (left %d(%s)... options)\n", ret, yopt_tail, argv[yopt_tail]);
 
 	return ret;
 }
@@ -31,6 +31,7 @@ static int ${PROJ}_yopts_fixup_choices(void);
 static int ${PROJ}_yopts_parse_args(int argc, char **argv);
 static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = YOPTS_PARSE_OK;
+int yopt_tail;
 
 __attribute__((weak)) void yopt_print(const char *format, ...)
 {
@@ -125,8 +126,10 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv)
 #define next_arg()	do {	\
 		argc--;		\
 		argv++;		\
+		yopt_tail++;	\
 	} while (0)
 
+	yopt_tail = optind;
 	yopt_err = YOPTS_PARSE_OK;
 
 	${PARSE_ARGS}
