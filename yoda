@@ -534,7 +534,7 @@ for yopt in yopts:
 		yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
 
 	if yopt.need_dup_trick:
-		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
+		yopt_assign = "optarg ? : YOPTARG_SET" # This means that the option was at least specified
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
 	elif yopt.atype == typ_boolean:
 		yopt_assign = "true"
@@ -706,7 +706,7 @@ def gen_short_trick(dup, yopt, with_cexp):
 		yopt_sub_str = "if (%s) " % yoda_gen_cexpression(dup.optional_for)
 
 	if dup.atype == typ_boolean:
-		yopt_assign = "(%s_optarg == (char *)-1)"
+		yopt_assign = "(%s_optarg == YOPTARG_SET)"
 	elif dup.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(%s_optarg)"
 	elif dup.atype in (typ_string, typ_path):

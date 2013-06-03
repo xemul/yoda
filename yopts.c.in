@@ -33,6 +33,8 @@ static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = YOPTS_PARSE_OK;
 int yopt_tail;
 
+#define YOPTARG_SET	((char *)-1)
+
 __attribute__((weak)) void yopt_print(const char *format, ...)
 {
         va_list params;
