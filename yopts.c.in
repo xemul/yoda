@@ -57,7 +57,7 @@ static inline void *yopt_realloc_mem(void *ptr, unsigned long size)
 	return ret;
 }
 
-static unsigned int yopt_parse_int(char *str)
+static inline unsigned int yopt_parse_int(char *str)
 {
 	char *aux;
 	unsigned int ret;
