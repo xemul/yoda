@@ -590,6 +590,11 @@ yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
 # Generate validation routine (choices)
 yopt_str = ""
 unknown_opt = "yopt_print(\"Unknown %s value %s\\n\", %s);"
+choice_assign_str = "\
+if (%s)\n\
+		%s_code = %s;\n\
+	else "
+
 for yopt in yopts:
 	if not len(yopt.choice):
 		continue
@@ -600,10 +605,7 @@ for yopt in yopts:
 			vals.insert(0, ch.val)
 			cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x), vals)
 			cmps = " || ".join(cmps)
-			yopt_str += "if (%s) {\n" % cmps
-
-			yopt_str += "\t\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
-			yopt_str += "\t} else "
+			yopt_str += choice_assign_str % (cmps, opt_sname(yopt), ch.ccode)
 
 		yopt_str += "{\n\t\t" + unknown_opt % (opt_pname(yopt), "%s", opt_sname(yopt)) + "\n\t"
 		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t}\n\n\t"
