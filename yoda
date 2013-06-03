@@ -279,6 +279,51 @@ else:
 	yopt.sname_nr = sopt_rover
 	sopt_rover = next_rover(sopt_rover)
 
+# Name of yopts struct member
+def opt_cname(yopt):
+	if yopt.lname:
+		return yopt.lname.replace("-", "_")
+	else:
+		return "opt_" + yopt.sname
+
+# Name of option when printed on a screen
+def opt_pname(yopt):
+	if yopt.otype == opt_option:
+		if yopt.lname:
+			return "--%s" % yopt.lname
+		else:
+			return "-%s" % yopt.sname
+	else:
+		if yopt.lname:
+			return yopt.lname
+		else:
+			return yopt.sname
+
+# Name of variable (with struct name)
+def opt_sname(yopt):
+	return "%s_yopts.%s" % (yname, opt_cname(yopt))
+
+# Name of variable (short version, for duplicates)
+def opt_ssname(yopt):
+	return "%s_yopts.%s" % (yname, yopt.sname)
+
+# Basic validity checks
+
+for yopt in yopts:
+	if len(yopt.short_dups):
+		if yopt.pile:
+			print "Pile-d option %s can't have short dups" % opt_pname(yopt)
+			sys.exit(1)
+		for dup in yopt.short_dups:
+			if dup.pile:
+				print "Pile-d option %s can't have short dups" % opt_pname(yopt)
+				sys.exit(1)
+
+	if len(yopt.choice):
+		if yopt.atype in (typ_boolean, typ_path):
+			print "Can't have choices for bool/path option %s" % opt_pname(yopt)
+			sys.exit(1)
+
 yopts.append(yopt)
 
 # FIXME -- add proper check here. Right now yoda can only generate C parser,
@@ -312,34 +357,6 @@ ctypes = {
 	typ_string:	"char *",
 	typ_path:	"char *",
 }
-
-# Name of yopts struct member
-def opt_cname(yopt):
-	if yopt.lname:
-		return yopt.lname.replace("-", "_")
-	else:
-		return "opt_" + yopt.sname
-
-# Name of option when printed on a screen
-def opt_pname(yopt):
-	if yopt.otype == opt_option:
-		if yopt.lname:
-			return "--%s" % yopt.lname
-		else:
-			return "-%s" % yopt.sname
-	else:
-		if yopt.lname:
-			return yopt.lname
-		else:
-			return yopt.sname
-
-# Name of variable (with struct name)
-def opt_sname(yopt):
-	return "%s_yopts.%s" % (yname, opt_cname(yopt))
-
-# Name of variable (short version, for duplicates)
-def opt_ssname(yopt):
-	return "%s_yopts.%s" % (yname, yopt.sname)
 
 def opt_need_dup_trick(yopt):
 	for dup in yopt.short_dups:
@@ -508,7 +525,6 @@ for yopt in yopts:
 		yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
 
 	if yopt.need_dup_trick:
-		assert(not yopt.pile)
 		yopt_assign = "optarg ? : (char *)-1" # This means that the option was at least specified
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
 	elif yopt.atype == typ_boolean:
@@ -529,7 +545,6 @@ for yopt in yopts:
 	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
 	if not yopt.need_dup_trick:
 		for dup in yopt.short_dups:
-			assert(not yopt.pile)
 			yopt_str += "\t\t\t%s = %s;\n" % (opt_sname(dup), yopt_assign)
 	yopt_str += "\t\t\tbreak;"
 
