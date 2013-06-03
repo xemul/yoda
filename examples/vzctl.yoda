@@ -1,4 +1,4 @@
-set	auto-dash-alias
+set	auto_dash_alias
 
 arg	command
 	string	command to execute

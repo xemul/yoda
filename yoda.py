@@ -214,7 +214,7 @@ for l in yfile:
 			def_req_for = ls[1]
 		elif ls[0] == "pile":
 			def_pile = True
-		elif ls[0] == "auto-dash-alias":
+		elif ls[0] == "auto_dash_alias":
 			assert(len(yopts) == 0)
 			auto_alias_dashed = True
 		else:
