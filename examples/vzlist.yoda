@@ -35,3 +35,6 @@ option	sort/s
 
 option	list/L
 	bool	get possible field names
+
+option	/1
+	bool	synonym for --no-header --output ctid
