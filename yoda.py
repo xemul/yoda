@@ -119,7 +119,7 @@ for l in yfile:
 		yex = yopt_find_l(yopt.lname)
 		if yex:
 			print "Duplicate option name %s\n" % yopt.lname
-			assert(False)
+			sys.exit(1)
 
 		if len(ln):
 			yopt.sname = ln.pop(0)
@@ -238,7 +238,7 @@ for l in yfile:
 		 	print "Unknown unset", ls[0]
 	else:
 		print "Unknown keyword", ls[0]
-		assert(False)
+		sys.exit(1)
 
 yfile.close()
 
@@ -539,7 +539,7 @@ for yopt in yopts:
 		arg_assign = "yopt_parse_int(*argv)"
 	else:
 		print "Wrong type for an argument\n"
-		assert(False)
+		sys.exit(1)
 
 	yopt_str += "if (argc) {\n\t"
 	yopt_str += "\tdprint(\"%s assigned to %%s\\n\", *argv);\n\t" % opt_sname(yopt)
@@ -607,7 +607,7 @@ def yoda_gen_one_cexp(exp):
 				cval = ch.ccode
 				break
 		else:
-			assert(False)
+			sys.exit(1)
 	elif yopt.atype == typ_integer:
 		fixup = ""
 		if parts[1]:
@@ -618,7 +618,7 @@ def yoda_gen_one_cexp(exp):
 			cval = "0"
 	else:
 		print "No req check for %s\n" % opt_sname(yopt)
-		assert(False) # FIXME
+		sys.exit(1)
 
 	return "%s%s%s%s" % (opt_sname(yopt), fixup, comp, cval)
 
