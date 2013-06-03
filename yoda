@@ -596,12 +596,11 @@ for yopt in yopts:
 
 	if yopt.atype == typ_string:
 		for ch in yopt.choice:
-			yopt_str += "if (!strcmp(%s, \"%s\")" % (opt_sname(yopt), ch.val)
-			if getattr(ch, "aliases", None):
-				for al in ch.aliases:
-					yopt_str += " || !strcmp(%s, \"%s\")" % (opt_sname(yopt), al)
-
-			yopt_str += ") {\n"
+			vals = getattr(ch, "aliases", None) or []
+			vals.insert(0, ch.val)
+			cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x), vals)
+			cmps = " || ".join(cmps)
+			yopt_str += "if (%s) {\n" % cmps
 
 			yopt_str += "\t\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
 			yopt_str += "\t} else "
