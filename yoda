@@ -326,6 +326,14 @@ for yopt in yopts:
 			print "Can't have choices for bool/path option %s" % opt_pname(yopt)
 			sys.exit(1)
 
+	if yopt.atype == typ_boolean:
+		if getattr(yopt, "defval", None):
+			print "Boolean option %s can't have default" % opt_pname(yopt)
+			sys.exit(1)
+		if getattr(yopt, "optarg", None):
+			print "Boolean option %s can't have optarg" % opt_pname(yopt)
+			sys.exit(1)
+
 yopts.append(yopt)
 
 # FIXME -- add proper check here. Right now yoda can only generate C parser,
