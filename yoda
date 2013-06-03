@@ -561,6 +561,16 @@ yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 
 # Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
 yopt_str = ""
+arg_assign_str = \
+"	if (argc) {\n\
+		dprint(\"%s assigned to %%s\\n\", *argv);\n\
+		%s = %s;\n\
+		next_arg();\n\
+	} else {\n\
+		yopt_print(\"No value for %s\\n\");\n\
+		yopt_err = YOPTS_PARSE_ERR;\n\
+	}\n"
+
 for yopt in yopts:
 	if yopt.otype != opt_argument:
 		continue
@@ -573,15 +583,7 @@ for yopt in yopts:
 		print "Wrong type for an argument\n"
 		sys.exit(1)
 
-	yopt_str += "if (argc) {\n\t"
-	yopt_str += "\tdprint(\"%s assigned to %%s\\n\", *argv);\n\t" % opt_sname(yopt)
-	yopt_str += "\t%s = %s;\n\t" % (opt_sname(yopt), arg_assign)
-	yopt_str += "\tnext_arg();\n\t"
-
-	yopt_str += "} else {\n\t"
-	yopt_str += "\tyopt_print(\"No value for %s\\n\");\n\t" % opt_pname(yopt)
-	yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t"
-	yopt_str += "}\n\t"
+	yopt_str += arg_assign_str % (opt_sname(yopt), opt_sname(yopt), arg_assign, opt_pname(yopt))
 
 yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
 

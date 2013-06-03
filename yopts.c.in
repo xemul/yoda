@@ -132,7 +132,7 @@ static int ${PROJ}_yopts_parse_args(int argc, char **argv)
 	yopt_tail = optind;
 	yopt_err = YOPTS_PARSE_OK;
 
-	${PARSE_ARGS}
+${PARSE_ARGS}
 
 	return yopt_err;
 }
