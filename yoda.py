@@ -62,6 +62,8 @@ yopts = []
 yopt_name_len_max = 0
 
 std_shorts = set(["v", "V", "h"])
+short_help = None
+short_version = None
 
 def_for = None
 def_req_for = None
@@ -217,6 +219,12 @@ for l in yfile:
 		elif ls[0] == "auto_dash_alias":
 			assert(len(yopts) == 0)
 			auto_alias_dashed = True
+		elif ls[0] == "short_help":
+		 	assert(len(yopts) == 0)
+		 	short_help = ls[1]
+		elif ls[0] == "short_version":
+		 	assert(len(yopts) == 0)
+		 	short_version = ls[1]
 		else:
 		 	print "Unknown set", ls[0]
 	elif (ls[0] == "unset"):
@@ -240,7 +248,9 @@ yopt = yoption(opt_option)
 yopt.lname = "help"
 yopt.atype = typ_boolean
 yopt.summary = "show help text"
-if "h" in std_shorts:
+if short_help:
+	yopt.sname = short_help
+elif "h" in std_shorts:
 	yopt.sname = "h"
 else:
 	yopt.sname_nr = sopt_rover
@@ -254,7 +264,9 @@ yopt = yoption(opt_option)
 yopt.lname = "version"
 yopt.atype = typ_boolean
 yopt.summary = "show version"
-if "v" in std_shorts:
+if short_version:
+	yopt.sname = short_version
+elif "v" in std_shorts:
 	yopt.sname = "v"
 elif "V" in std_shorts:
 	yopt.sname = "V"

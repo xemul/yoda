@@ -1,3 +1,5 @@
+set	short_version	e
+
 option	no-header/H
 	bool	suppress columns header
 
