@@ -407,15 +407,20 @@ yincode = yincode.replace("${STRUCTURE}", yopt_str)
 
 # Generate constants for choice-d options and arguments
 yopt_str = ""
+enum_decl_str = "\
+enum {\n\
+%s\
+};\n\n"
+
 for yopt in yopts:
 	if not len(yopt.choice):
 		continue
 
-	yopt_str += "enum {\n";
 	for ch in yopt.choice:
 		ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
-		yopt_str += "\t%s,\n" % ch.ccode
-	yopt_str += "};\n\n"
+
+	vals = map(lambda x: "\t%s,\n" % x.ccode, yopt.choice)
+	yopt_str += enum_decl_str % "".join(vals)
 
 yincode = yincode.replace("${CHOICES}", yopt_str)
 
