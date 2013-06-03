@@ -26,6 +26,7 @@ opt_argument = 2
 typ_boolean = 1
 typ_integer = 2
 typ_string = 3
+typ_path = 4
 
 generators = [ "cparser" ]
 
@@ -183,7 +184,10 @@ for l in yfile:
 		yopt.atype = typ_string
 		if len(ls) == 2:
 			yopt.summary = ls[1]
-		# else option is deprecated
+	elif (ls[0] == "path"):
+		yopt.atype = typ_path
+		if len(ls) == 2:
+			yopt.summary = ls[1]
 	elif (ls[0] == "choice"):
 		cs = ls[1].split(None, 1)
 		yc = ychoice()
@@ -305,6 +309,7 @@ ctypes = {
 	typ_boolean:	"bool",
 	typ_integer:	"int",
 	typ_string:	"char *",
+	typ_path:	"char *",
 }
 
 # Name of yopts struct member
@@ -414,7 +419,7 @@ for yopt in yopts:
 	if yopt_str:
 		yopt_str += "\t"
 
-	if yopt.atype == typ_string:
+	if yopt.atype in (typ_string, typ_path):
 		yassig = cstrval(yopt.defval)
 	elif yopt.atype == typ_integer:
 		yassig = "%s" % yopt.defval
@@ -479,7 +484,7 @@ yincode = yincode.replace("${LOPTS}", yopt_str)
 
 # Generate options assignment
 def optarg_assign(yopt):
-	if yopt.atype == typ_string:
+	if yopt.atype in (typ_string, typ_path):
 		return cstrval(yopt.optarg)
 	elif yopt.optarg.startswith("+"):
 		return "%s %s" % (opt_sname(yopt), yopt.optarg)
@@ -506,7 +511,7 @@ for yopt in yopts:
 		yopt_vassign = opt_ssname(yopt) + "_optarg"
 	elif yopt.atype == typ_boolean:
 		yopt_assign = "true"
-	elif yopt.atype == typ_string:
+	elif yopt.atype in (typ_string, typ_path):
 		yopt_assign = "optarg"
 	elif yopt.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(optarg)"
@@ -533,7 +538,7 @@ for yopt in yopts:
 	if yopt.otype != opt_argument:
 		continue
 
-	if yopt.atype == typ_string:
+	if yopt.atype in (typ_string, typ_path):
 		arg_assign = "*argv"
 	elif yopt.atype == typ_integer:
 		arg_assign = "yopt_parse_int(*argv)"
@@ -560,7 +565,7 @@ for yopt in yopts:
 	if not len(yopt.choice):
 		continue
 
-	if yopt.atype == typ_string:
+	if yopt.atype in (typ_string, typ_path):
 		for ch in yopt.choice:
 			yopt_str += "if (!strcmp(%s, \"%s\")" % (opt_sname(yopt), ch.val)
 			if getattr(ch, "aliases", None):
@@ -599,7 +604,7 @@ def yoda_gen_one_cexp(exp):
 		fixup = ""
 		comp = ""
 		cval = ""
-	elif (yopt.atype == typ_string) and len(yopt.choice):
+	elif (yopt.atype in (typ_string, typ_path)) and len(yopt.choice):
 		fixup = "_code"
 		comp = " == "
 		for ch in yopt.choice:
@@ -668,7 +673,7 @@ def gen_short_trick(dup, yopt, with_cexp):
 		yopt_assign = "(%s_optarg == (char *)-1)"
 	elif dup.atype == typ_integer:
 		yopt_assign = "yopt_parse_int(%s_optarg)"
-	elif dup.atype == typ_string:
+	elif dup.atype in (typ_string, typ_path):
 		yopt_assign = "%s_optarg"
 
 	yopt_assign %= opt_ssname(yopt)
@@ -843,9 +848,11 @@ for group in yopts_groups:
 			yopt_sub_str += " " + yopt_argname(yopt, "NUM")
 		elif yopt.atype == typ_string:
 			yopt_sub_str += " " + yopt_argname(yopt, "STR")
+		elif yopt.atype == typ_path:
+			yopt_sub_str += " " + yopt_argname(yopt, "PATH")
 
 		yopt_str += yopt_align + "\"" + yopt_indent + \
-			    yopt_sub_str.ljust(10 + yopt_name_len_max) + \
+			    yopt_sub_str.ljust(12 + yopt_name_len_max) + \
 			    yopt.summary.lower() + "\\n\"" + "\n"
 
 		if len(yopt.choice) > 0:
@@ -855,7 +862,7 @@ for group in yopts_groups:
 				else:
 					yopt_sub_str = "%s" % ch.val
 				yopt_str += yopt_align + "\"" + yopt_indent + \
-					    "".ljust(10 + yopt_name_len_max) + \
+					    "".ljust(12 + yopt_name_len_max) + \
 					    yopt_indent + yopt_sub_str + "\\n\"\n"
 
 yincode = yincode.replace("${USAGE}", yopt_str)

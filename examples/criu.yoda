@@ -17,7 +17,7 @@ option	pid/p
 	req_for		action = show | action = exec
 
 option	images-dir/D
-	string		DIRectory with images
+	path		directory with images
 	default		.
 
 option	page-server
@@ -94,7 +94,7 @@ option	veth-pair
 	pile
 
 option	log-file/o
-	string		log FILE name (path is relative to --images-dir)
+	path		log file name (path is relative to --images-dir)
 
 option	log-pid
 	bool		enable per-process logging to separate FILE.pid files
@@ -105,7 +105,7 @@ option	track-mem
 	for		action = dump | action = pre-dump
 
 option	prev-images-dir
-	string		PATH to images from previous dump (relative to --images-dir)
+	path		path to images from previous dump (relative to --images-dir)
 	for		action = dump | action = pre-dump
 
 option	daemon/d
