@@ -563,6 +563,11 @@ if (%s)\n\
 		%s_code = %s;\n\
 	else "
 
+choice_check_str = "\
+if (!%s)\n\
+		/* do nothing */;\n\
+	else "
+
 opt_err_str = "\
 		yopt_print(\"Unknown %s value %s\\n\", %s);\n\
 		yopt_err = YOPTS_PARSE_ERR;\n\
@@ -582,6 +587,9 @@ for yopt in yopts:
 		continue
 
 	if yopt.atype == typ_string:
+		if yopt.otype != opt_argument:
+			yopt_str += choice_check_str % opt_sname(yopt)
+
 		for ch in yopt.choice:
 			vals = getattr(ch, "aliases", None) or []
 			vals.insert(0, ch.val)
