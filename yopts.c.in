@@ -27,9 +27,10 @@ struct yopts ${PROJ}_yopts = {
 
 static int ${PROJ}_yopts_usage(char *prog, int ret);
 static int ${PROJ}_yopts_fixup_choices(void);
-static int ${PROJ}_yopts_parse_args(int argc, char **argv);
+static int ${PROJ}_yopts_parse_arg(char *arg);
 static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = YOPTS_PARSE_OK;
+static const int yopt_nr_args = ${NR_ARGS};
 int yopt_tail;
 
 #define YOPTARG_SET	((char *)-1)
@@ -74,19 +75,40 @@ static inline unsigned int yopt_parse_int(char *str)
 int ${PROJ}_yopts_parse(int argc, char **argv)
 {
 	int opt, idx;
-	static const char short_opts[] = "${SOPTS}";
+	static const char short_opts[] = "-${SOPTS}";
+	const char *cur_sopt = short_opts;
 	static const struct option long_opts[] = {
 		${LOPTS}
 		{ }
 	};
 
+	if (!yopt_nr_args)
+		cur_sopt++;
+
 	while (1) {
-		opt = getopt_long(argc, argv, short_opts, long_opts, &idx);
+		opt = getopt_long(argc, argv, cur_sopt, long_opts, &idx);
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 		${OPTS_ASSIGN}
+		case 1:
+			if (*cur_sopt != '-') {
+				yopt_print("YODA: Internal error. Plz, report to developers.\n");
+				return YOPTS_PARSE_ERR;
+			}
+
+			opt = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
+			if (opt) {
+				dprint("Reset arg scan to permutating\n");
+				/* reset getopt_long to normal (permutating) scan */
+				optind--;
+				argc -= optind;
+				argv += optind;
+				optind = 0;
+				cur_sopt++;
+			}
+			break;
 		default:
 			return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_ERR);
 		}
@@ -95,17 +117,12 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 			return yopt_err;
 	}
 
+	yopt_tail = optind + 1;
+
 	if (${PROJ}_yopts.help)
 		return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
 	if (${PROJ}_yopts.version)
 		return YOPTS_PARSE_SPECIAL;
-
-	argc -= optind;
-	argv += optind;
-
-	yopt_err = ${PROJ}_yopts_parse_args(argc, argv);
-	if (yopt_err)
-		return yopt_err;
 
 	yopt_err = ${PROJ}_yopts_fixup_choices();
 	if (yopt_err)
@@ -118,20 +135,16 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 	return YOPTS_PARSE_OK;
 }
 
-static int ${PROJ}_yopts_parse_args(int argc, char **argv)
+static int ${PROJ}_yopts_parse_arg(char *arg)
 {
-#define next_arg()	do {	\
-		argc--;		\
-		argv++;		\
-		yopt_tail++;	\
-	} while (0)
+	static int carg = 0;
 
-	yopt_tail = optind;
-	yopt_err = YOPTS_PARSE_OK;
+	switch (carg) {
+${ASSIGN_ARGS}
+	}
 
-${PARSE_ARGS}
-
-	return yopt_err;
+	carg++;
+	return carg == yopt_nr_args;
 }
 
 static int ${PROJ}_yopts_fixup_choices(void)

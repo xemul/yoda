@@ -102,7 +102,7 @@ def make_dash_alias(name):
 	else:
 		return None
 
-sopt_rover = next_rover(0)
+sopt_rover = next_rover(1)
 
 for l in yfile:
 	if (l.startswith("#")):
@@ -531,30 +531,30 @@ yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 # Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
 yopt_str = ""
 arg_assign_str = \
-"	if (argc) {\n\
-		dprint(\"%s assigned to %%s\\n\", *argv);\n\
+"	case %d:\n\
+		dprint(\"%s assigned to %%s\\n\", arg);\n\
 		%s = %s;\n\
-		next_arg();\n\
-	} else {\n\
-		yopt_print(\"No value for %s\\n\");\n\
-		yopt_err = YOPTS_PARSE_ERR;\n\
-	}\n"
+		break;\n\
+"
 
+args_nr = 0
 for yopt in yopts:
 	if yopt.otype != opt_argument:
 		continue
 
 	if yopt.atype in (typ_string, typ_path):
-		arg_assign = "*argv"
+		arg_assign = "arg"
 	elif yopt.atype == typ_integer:
-		arg_assign = "yopt_parse_int(*argv)"
+		arg_assign = "yopt_parse_int(arg)"
 	else:
 		print "Wrong type for an argument\n"
 		sys.exit(1)
 
-	yopt_str += arg_assign_str % (opt_sname(yopt), opt_sname(yopt), arg_assign, opt_pname(yopt))
+	yopt_str += arg_assign_str % (args_nr, opt_sname(yopt), opt_sname(yopt), arg_assign)
+	args_nr += 1
 
-yincode = yincode.replace("${PARSE_ARGS}", yopt_str)
+yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)
+yincode = yincode.replace("${NR_ARGS}", "%d" % args_nr)
 
 # Generate validation routine (choices)
 yopt_str = ""
@@ -564,12 +564,17 @@ if (%s)\n\
 	else "
 
 choice_check_str = "\
-if (!%s)\n\
-		/* do nothing */;\n\
-	else "
+if (!%s) {\n\
+%s\
+	} else "
 
 opt_err_str = "\
 		yopt_print(\"Unknown %s value %s\\n\", %s);\n\
+		yopt_err = YOPTS_PARSE_ERR;\n\
+"
+
+opt_noval_str = "\
+		yopt_print(\"No value for %s\\n\");\n\
 		yopt_err = YOPTS_PARSE_ERR;\n\
 "
 
@@ -587,8 +592,11 @@ for yopt in yopts:
 		continue
 
 	if yopt.atype == typ_string:
-		if yopt.otype != opt_argument:
-			yopt_str += choice_check_str % opt_sname(yopt)
+		if yopt.otype == opt_argument:
+			no_val_action = opt_noval_str % opt_pname(yopt)
+		else:
+			no_val_action = ""
+		yopt_str += choice_check_str % (opt_sname(yopt), no_val_action)
 
 		for ch in yopt.choice:
 			vals = getattr(ch, "aliases", None) or []
