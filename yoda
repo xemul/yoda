@@ -42,6 +42,15 @@ class yoption:
 class ychoice:
 	pass
 
+class ygroup:
+	def __init__(self):
+		self.yopts = []
+		self.parent = None
+	pass
+
+yopt_groups = {}
+yopt_groups["generic"] = ygroup()
+
 #
 # Our own command line
 arg_parser = argparse.ArgumentParser()
@@ -287,6 +296,62 @@ else:
 
 yopts.append(yopt)
 
+def opt_deprecated(yopt):
+	return not getattr(yopt, "summary", None)
+
+# Classify options
+#   each option may get into one or more "group", each
+#   group will have its own options-table that will be
+#   switched by the parser
+
+active_classifier = None
+
+for yopt in yopts:
+	if yopt.otype != opt_option:
+		continue
+	if opt_deprecated(yopt):
+		continue
+
+	exps = []
+	ygrps = []
+
+	if getattr(yopt, "required_for", None):
+		exps.extend(yopt.required_for.split("|"))
+	if getattr(yopt, "optional_for", None):
+		exps.extend(yopt.optional_for.split("|"))
+
+	if not exps:
+		ygrps = [ yopt_groups["generic"] ]
+	else:
+		for exp in exps:
+			exp_str = "%s" % exp.strip()
+			ep = exp_str.partition("=")[0].strip()
+			y = yopt_find_l(ep)
+			if not y:
+				print "No option for expression with %s" % ep
+				sys.exit(1)
+
+			if y.otype == opt_option:
+				continue
+
+			if not active_classifier:
+				active_classifier = y
+			elif y != active_classifier:
+				print "More than one active classifier."
+				sys.exit(1)
+
+			if not yopt_groups.has_key(exp_str):
+				yopt_groups[exp_str] = ygroup()
+
+			ygrps.append(yopt_groups[exp_str])
+
+		if not exps:
+			ygrps = [ yopt_groups["generic"] ]
+
+
+	for ygrp in ygrps:
+		ygrp.yopts.append(yopt)
+
 # Name of yopts struct member
 def opt_cname(yopt):
 	if yopt.lname:
@@ -358,9 +423,6 @@ ctypes = {
 	typ_string:	"char *",
 	typ_path:	"char *",
 }
-
-def opt_deprecated(yopt):
-	return not getattr(yopt, "summary", None)
 
 #
 # Generate the .h file
