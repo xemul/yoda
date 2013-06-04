@@ -616,56 +616,47 @@ yincode = yincode.replace("${YSETS}", yinscode)
 
 # Generate validation routine (choices)
 yopt_str = ""
-choice_assign_str = "\
-if (%s)\n\
-		%s_code = %s;\n\
-	else "
 
-choice_check_str = "\
-if (!%s) {\n\
-%s\
-	} else "
-
-opt_err_str = "\
-		yopt_print(\"Unknown %s value %s\\n\", %s);\n\
-		yopt_err = YOPTS_PARSE_ERR;\n\
-"
-
-opt_noval_str = "\
-		yopt_print(\"No value for %s\\n\");\n\
-		yopt_err = YOPTS_PARSE_ERR;\n\
-"
-
-opt_switch_str = "\
-switch (%s) {\n\
-	%s\n\
-		break;\n\
-	default:\n\
-%s\n\
-		break;\n\
-	}\n\n\t"
+def c_indent(istr, code):
+	return istr + istr.join(code.splitlines(True))
 
 def gen_choice_fixup(yopt):
 	yopt_str = ""
 	if yopt.atype == typ_string:
+		yopt_str += "if (!%s) {\n" % opt_sname(yopt)
 		if yopt.otype == opt_argument:
-			no_val_action = opt_noval_str % opt_pname(yopt)
+			yopt_str += "\tyopt_print(\"No value for %s\\n\");\n" % opt_pname(yopt)
+			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
 		else:
-			no_val_action = ""
-		yopt_str += choice_check_str % (opt_sname(yopt), no_val_action)
+			yopt_str += "\t;\n"
+		yopt_str += "} else "
 
 		for ch in yopt.choice:
 			vals = getattr(ch, "aliases", None) or []
 			vals.insert(0, ch.val)
 			cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x), vals)
 			cmps = " || ".join(cmps)
-			yopt_str += choice_assign_str % (cmps, opt_sname(yopt), ch.ccode)
+			yopt_str += "if (%s) {\n" % cmps
+			yopt_str += "\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
+			yopt_str += "} else "
 
-		yopt_str += "{\n%s\t}\n\n\t" % (opt_err_str % (opt_pname(yopt), "%s", opt_sname(yopt)))
+		yopt_str += " {\n"
+		yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+		yopt_str += "}\n\n"
+
 	elif yopt.atype == typ_integer:
-		cases = map(lambda x: "case %s:\n\t" % x.val, yopt.choice)
-		dflt = opt_err_str % (opt_pname(yopt), "%d", opt_sname(yopt))
-		yopt_str += opt_switch_str % (opt_sname(yopt), "".join(cases), dflt)
+		yopt_str += "switch (%s) {\n" % opt_sname(yopt)
+		cases = map(lambda x: "case %s:\n" % x.val, yopt.choice)
+		yopt_str += "".join(cases)
+		yopt_str += "\tbreak;\n"
+		yopt_str += "default:\n"
+		if (yopt.otype == opt_option):
+			yopt_str += "\tif (!%s)\n" % opt_sname(yopt)
+			yopt_str += "\t\tbreak;\n"
+		yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+		yopt_str += "}\n\n"
 
 	return yopt_str
 
@@ -676,6 +667,7 @@ for yopt in yopts:
 
 	yopt_str += gen_choice_fixup(yopt)
 
+yopt_str = c_indent("\t", yopt_str)
 yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
 
 # Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array

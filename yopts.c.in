@@ -152,7 +152,7 @@ static int ${PROJ}_yopts_fixup_choices(void)
 {
 	yopt_err = YOPTS_PARSE_OK;
 
-	${FIX_CHOICES}
+${FIX_CHOICES}
 	return yopt_err;
 }
 
