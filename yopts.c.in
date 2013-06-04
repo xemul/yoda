@@ -100,11 +100,15 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 
 			opt = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
 			if (opt) {
+				if (opt < 0)
+					goto stop_scan;
+
 				dprint("Reset arg scan to permutating\n");
 				/* reset getopt_long to normal (permutating) scan */
 				optind--;
 				argc -= optind;
 				argv += optind;
+				yopt_tail += optind;
 				optind = 0;
 				cur_sopt++;
 			}
@@ -116,8 +120,8 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		if (yopt_err)
 			return yopt_err;
 	}
-
-	yopt_tail = optind + 1;
+stop_scan:
+	yopt_tail += optind;
 
 	if (${PROJ}_yopts.help)
 		return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);

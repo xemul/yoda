@@ -34,6 +34,7 @@ generators = [ "cparser" ]
 class yoption:
 	def __init__(self, otype):
 		self.choice = []
+		self.schoice = []
 		self.otype = otype
 		self.pile = def_pile
 	pass
@@ -193,6 +194,10 @@ for l in yfile:
 		yc = ychoice()
 		css = cs[0].split("/")
 		yc.val = css.pop(0)
+		if yc.val.startswith("!"):
+			yc.val = yc.val.lstrip("!")
+			yopt.schoice.append(yc)
+
 		if len(css):
 			yc.aliases = css
 		if len(cs) > 1:
@@ -534,7 +539,12 @@ arg_assign_str = \
 "	case %d:\n\
 		dprint(\"%s assigned to %%s\\n\", arg);\n\
 		%s = %s;\n\
+%s\
 		break;\n\
+"
+arg_spec_check_str = "\
+		if (%s)\n\
+			return -1;\n\
 "
 
 args_nr = 0
@@ -550,7 +560,12 @@ for yopt in yopts:
 		print "Wrong type for an argument\n"
 		sys.exit(1)
 
-	yopt_str += arg_assign_str % (args_nr, opt_sname(yopt), opt_sname(yopt), arg_assign)
+	spec_check = ""
+	if len(yopt.schoice):
+		cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x.val), yopt.schoice)
+		spec_check = arg_spec_check_str % " || ".join(cmps)
+
+	yopt_str += arg_assign_str % (args_nr, opt_sname(yopt), opt_sname(yopt), arg_assign, spec_check)
 	args_nr += 1
 
 yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)

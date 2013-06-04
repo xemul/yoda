@@ -15,8 +15,8 @@ arg	command
 	choice	quotaoff	turn quota off
 	choice	console		open container's console
 	choice	enter		enter the container
-	choice	exec		execute a commaind inside container
-	choice	exec2		the same, but ...
+	choice	!exec		execute a commaind inside container
+	choice	!exec2		the same, but ...
 	choice	runscript	?
 	choice	suspend/chkpnt	suspend a container
 	choice	resume/restore	resume container after suspend
