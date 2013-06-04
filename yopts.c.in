@@ -72,53 +72,77 @@ static inline unsigned int yopt_parse_int(char *str)
 	return ret;
 }
 
+struct yopt_set {
+	const char *s;
+	const struct option *l;
+	int (*assign)(int opt, char **argv);
+};
+
+static const char gen_short_opts[] = "-${SOPTS}";
+static const struct option gen_long_opts[] = {
+	${LOPTS}
+	{}
+};
+
+static int gen_assign(int opt, char **argv)
+{
+	int ret = 0;
+
+	switch (opt) {
+	${OPTS_ASSIGN}
+	case 1:
+		ret = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
+		break;
+	default:
+		yopt_err = YOPTS_PARSE_ERR;
+		break;
+	}
+
+	return ret;
+}
+
+static struct yopt_set gen_set = {
+	.s = gen_short_opts,
+	.l = gen_long_opts,
+	.assign = gen_assign,
+};
+
+static struct yopt_set *ycur = &gen_set;
+
 int ${PROJ}_yopts_parse(int argc, char **argv)
 {
 	int opt, idx;
-	static const char short_opts[] = "-${SOPTS}";
-	const char *cur_sopt = short_opts;
-	static const struct option long_opts[] = {
-		${LOPTS}
-		{ }
-	};
+	bool permutate = false;
 
 	if (!yopt_nr_args)
-		cur_sopt++;
+		permutate = true;
 
 	while (1) {
-		opt = getopt_long(argc, argv, cur_sopt, long_opts, &idx);
+		opt = getopt_long(argc, argv, ycur->s + (permutate ? 1 : 0), ycur->l, &idx);
 		if (opt == -1)
 			break;
+		if ((opt == 1) && permutate) {
+			yopt_print("YODA: Internal error. Plz, report to developers.\n");
+			return YOPTS_PARSE_ERR;
+		}
 
-		switch (opt) {
-		${OPTS_ASSIGN}
-		case 1:
-			if (*cur_sopt != '-') {
-				yopt_print("YODA: Internal error. Plz, report to developers.\n");
-				return YOPTS_PARSE_ERR;
-			}
+		opt = ycur->assign(opt, argv);
+		if (opt) {
+			if (opt < 0)
+				goto stop_scan;
 
-			opt = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
-			if (opt) {
-				if (opt < 0)
-					goto stop_scan;
-
-				dprint("Reset arg scan to permutating\n");
-				/* reset getopt_long to normal (permutating) scan */
-				optind--;
-				argc -= optind;
-				argv += optind;
-				yopt_tail += optind;
-				optind = 0;
-				cur_sopt++;
-			}
-			break;
-		default:
-			return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_ERR);
+			dprint("Reset arg scan to permutating\n");
+			/* reset getopt_long to normal (permutating) scan */
+			optind--;
+			argc -= optind;
+			argv += optind;
+			yopt_tail += optind;
+			optind = 0;
+			permutate = true;
 		}
 
 		if (yopt_err)
-			return yopt_err;
+			return ${PROJ}_yopts_usage(argv[0], yopt_err);
 	}
 stop_scan:
 	yopt_tail += optind;

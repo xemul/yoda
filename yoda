@@ -547,7 +547,7 @@ for yopt in yopts:
 
 	for lname in lnames:
 		if yopt_str:
-			yopt_str += "\n\t\t"
+			yopt_str += "\n\t"
 
 		yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
 
@@ -568,7 +568,7 @@ for yopt in yopts:
 		continue
 
 	if yopt_str:
-		yopt_str += "\n\t\t"
+		yopt_str += "\n\t"
 
 	yopt_str += "case %s:\n" % opt_cassign(yopt)
 	yopt_vassign = opt_sname(yopt)
@@ -585,13 +585,13 @@ for yopt in yopts:
 	if getattr(yopt, "optarg", None):
 		yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
 
-	yopt_str += "\t\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
+	yopt_str += "\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
 	if yopt.pile:
-		yopt_str += "\t\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
+		yopt_str += "\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
 			     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
-		yopt_str += "\t\t\tif (%s)\n\t" % opt_sname(yopt)
-	yopt_str += "\t\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
-	yopt_str += "\t\t\tbreak;"
+		yopt_str += "\t\tif (%s)\n\t" % opt_sname(yopt)
+	yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
+	yopt_str += "\t\tbreak;"
 
 yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
 
