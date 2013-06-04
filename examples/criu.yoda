@@ -108,7 +108,7 @@ option	prev-images-dir
 	path		path to images from previous dump (relative to --images-dir)
 	for		action = dump | action = pre-dump
 
-option	daemon/d
+option	daemon
 	bool		run in the background after creating socket
 	for		action = page-server
 
