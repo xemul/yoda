@@ -512,98 +512,101 @@ yincode = yincode.replace("${DEFAULTS}", yopt_str)
 # Generate option sets
 #
 
-yinscode = yinscode.replace("${YSET}", "generic")
+def gen_opt_set(name, yopts):
+	yscode = yinscode.replace("${YSET}", name)
 
-# Generate and put short options array
-yopt_str = ""
-for yopt in yopts:
-	if not getattr(yopt, "sname", None):
-		continue
+	# Generate and put short options array
+	yopt_str = ""
+	for yopt in yopts:
+		if not getattr(yopt, "sname", None):
+			continue
 
-	yopt_str += yopt.sname
-	if yopt.atype != typ_boolean:
-		if getattr(yopt, "optarg", None):
-			yopt_str += "::"
+		yopt_str += yopt.sname
+		if yopt.atype != typ_boolean:
+			if getattr(yopt, "optarg", None):
+				yopt_str += "::"
+			else:
+				yopt_str += ":"
+
+	yscode = yscode.replace("${SOPTS}", yopt_str)
+
+	# Generate and put long options array
+
+	def opt_cassign(yopt):
+		if getattr(yopt, "sname", None):
+			return "'%s'" % yopt.sname
 		else:
-			yopt_str += ":"
+			return "%d" % yopt.sname_nr
 
-yinscode = yinscode.replace("${SOPTS}", yopt_str)
+	yopt_str = ""
+	for yopt in yopts:
+		if yopt.otype != opt_option:
+			continue
+		if not getattr(yopt, "lname", None):
+			continue
 
-# Generate and put long options array
+		if yopt.atype == typ_boolean:
+			yopt_rarg = "no_argument"
+		elif getattr(yopt, "optarg", None):
+			yopt_rarg = "optional_argument"
+		else:
+			yopt_rarg = "required_argument"
 
-def opt_cassign(yopt):
-	if getattr(yopt, "sname", None):
-		return "'%s'" % yopt.sname
-	else:
-		return "%d" % yopt.sname_nr
+		yopt_sopt = opt_cassign(yopt)
+		lnames = getattr(yopt, "laliases", [])
+		lnames.insert(0, yopt.lname)
 
-yopt_str = ""
-for yopt in yopts:
-	if yopt.otype != opt_option:
-		continue
-	if not getattr(yopt, "lname", None):
-		continue
+		for lname in lnames:
+			if yopt_str:
+				yopt_str += "\n\t"
 
-	if yopt.atype == typ_boolean:
-		yopt_rarg = "no_argument"
-	elif getattr(yopt, "optarg", None):
-		yopt_rarg = "optional_argument"
-	else:
-		yopt_rarg = "required_argument"
+			yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
 
-	yopt_sopt = opt_cassign(yopt)
-	lnames = getattr(yopt, "laliases", [])
-	lnames.insert(0, yopt.lname)
+	yscode = yscode.replace("${LOPTS}", yopt_str)
 
-	for lname in lnames:
+	# Generate options assignment
+	def optarg_assign(yopt):
+		if yopt.atype in (typ_string, typ_path):
+			return cstrval(yopt.optarg)
+		elif yopt.optarg.startswith("+"):
+			return "%s %s" % (opt_sname(yopt), yopt.optarg)
+		else:
+			return yopt.optarg
+
+	yopt_str = ""
+	for yopt in yopts:
+		if yopt.otype != opt_option:
+			continue
+
 		if yopt_str:
 			yopt_str += "\n\t"
 
-		yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
+		yopt_str += "case %s:\n" % opt_cassign(yopt)
+		yopt_vassign = opt_sname(yopt)
+		if yopt.pile:
+			yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
 
-yinscode = yinscode.replace("${LOPTS}", yopt_str)
+		if yopt.atype == typ_boolean:
+			yopt_assign = "true"
+		elif yopt.atype in (typ_string, typ_path):
+			yopt_assign = "optarg"
+		elif yopt.atype == typ_integer:
+			yopt_assign = "yopt_parse_int(optarg)"
 
-# Generate options assignment
-def optarg_assign(yopt):
-	if yopt.atype in (typ_string, typ_path):
-		return cstrval(yopt.optarg)
-	elif yopt.optarg.startswith("+"):
-		return "%s %s" % (opt_sname(yopt), yopt.optarg)
-	else:
-		return yopt.optarg
+		if getattr(yopt, "optarg", None):
+			yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
 
-yopt_str = ""
-for yopt in yopts:
-	if yopt.otype != opt_option:
-		continue
+		yopt_str += "\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
+		if yopt.pile:
+			yopt_str += "\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
+				     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
+			yopt_str += "\t\tif (%s)\n\t" % opt_sname(yopt)
+		yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
+		yopt_str += "\t\tbreak;"
 
-	if yopt_str:
-		yopt_str += "\n\t"
+	return yscode.replace("${OPTS_ASSIGN}", yopt_str);
 
-	yopt_str += "case %s:\n" % opt_cassign(yopt)
-	yopt_vassign = opt_sname(yopt)
-	if yopt.pile:
-		yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
-
-	if yopt.atype == typ_boolean:
-		yopt_assign = "true"
-	elif yopt.atype in (typ_string, typ_path):
-		yopt_assign = "optarg"
-	elif yopt.atype == typ_integer:
-		yopt_assign = "yopt_parse_int(optarg)"
-
-	if getattr(yopt, "optarg", None):
-		yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
-
-	yopt_str += "\t\tdprint(\"%s assigned to %%s\\n\", optarg);\n" % opt_sname(yopt)
-	if yopt.pile:
-		yopt_str += "\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
-			     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
-		yopt_str += "\t\tif (%s)\n\t" % opt_sname(yopt)
-	yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
-	yopt_str += "\t\tbreak;"
-
-yinscode = yinscode.replace("${OPTS_ASSIGN}", yopt_str);
+yinscode = gen_opt_set("generic", yopts)
 
 #
 # End generating sets -- put them into main .c file
