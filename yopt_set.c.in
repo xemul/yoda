@@ -1,0 +1,28 @@
+static const char ${YSET}_short_opts[] = "-${SOPTS}";
+static const struct option ${YSET}_long_opts[] = {
+	${LOPTS}
+	{}
+};
+
+static int ${YSET}_assign(int opt, char **argv)
+{
+	int ret = 0;
+
+	switch (opt) {
+	${OPTS_ASSIGN}
+	case 1:
+		ret = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
+		break;
+	default:
+		yopt_err = YOPTS_PARSE_ERR;
+		break;
+	}
+
+	return ret;
+}
+
+static struct yopt_set ${YSET}_set = {
+	.s = ${YSET}_short_opts,
+	.l = ${YSET}_long_opts,
+	.assign = ${YSET}_assign,
+};

@@ -78,36 +78,9 @@ struct yopt_set {
 	int (*assign)(int opt, char **argv);
 };
 
-static const char gen_short_opts[] = "-${SOPTS}";
-static const struct option gen_long_opts[] = {
-	${LOPTS}
-	{}
-};
+${YSETS}
 
-static int gen_assign(int opt, char **argv)
-{
-	int ret = 0;
-
-	switch (opt) {
-	${OPTS_ASSIGN}
-	case 1:
-		ret = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
-		break;
-	default:
-		yopt_err = YOPTS_PARSE_ERR;
-		break;
-	}
-
-	return ret;
-}
-
-static struct yopt_set gen_set = {
-	.s = gen_short_opts,
-	.l = gen_long_opts,
-	.assign = gen_assign,
-};
-
-static struct yopt_set *ycur = &gen_set;
+static struct yopt_set *ycur = &generic_set;
 
 int ${PROJ}_yopts_parse(int argc, char **argv)
 {

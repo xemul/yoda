@@ -483,6 +483,10 @@ yinfile = open(os.path.join(arg_opts.dir, "yopts.c.in"))
 yincode = yinfile.read()
 yincode = yincode.replace("${PROJ}", yname)
 
+yinsfile = open(os.path.join(arg_opts.dir, "yopt_set.c.in"))
+yinscode = yinsfile.read()
+yinscode = yinscode.replace("${PROJ}", yname)
+
 def cstrval(s):
 	return "\"%s\"" % s.strip("\"")
 
@@ -504,6 +508,12 @@ for yopt in yopts:
 
 yincode = yincode.replace("${DEFAULTS}", yopt_str)
 
+#
+# Generate option sets
+#
+
+yinscode = yinscode.replace("${YSET}", "generic")
+
 # Generate and put short options array
 yopt_str = ""
 for yopt in yopts:
@@ -517,7 +527,7 @@ for yopt in yopts:
 		else:
 			yopt_str += ":"
 
-yincode = yincode.replace("${SOPTS}", yopt_str)
+yinscode = yinscode.replace("${SOPTS}", yopt_str)
 
 # Generate and put long options array
 
@@ -551,7 +561,7 @@ for yopt in yopts:
 
 		yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
 
-yincode = yincode.replace("${LOPTS}", yopt_str)
+yinscode = yinscode.replace("${LOPTS}", yopt_str)
 
 # Generate options assignment
 def optarg_assign(yopt):
@@ -593,7 +603,13 @@ for yopt in yopts:
 	yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
 	yopt_str += "\t\tbreak;"
 
-yincode = yincode.replace("${OPTS_ASSIGN}", yopt_str);
+yinscode = yinscode.replace("${OPTS_ASSIGN}", yopt_str);
+
+#
+# End generating sets -- put them into main .c file
+#
+
+yincode = yincode.replace("${YSETS}", yinscode)
 
 # Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
 yopt_str = ""
@@ -929,5 +945,6 @@ yincode = yincode.replace("${USAGE}", yopt_str)
 youtfile = open(c_files[1], "w")
 youtfile.write(yincode)
 
+yinsfile.close()
 yinfile.close()
 youtfile.close()
