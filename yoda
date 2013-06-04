@@ -623,13 +623,10 @@ def c_indent(istr, code):
 def gen_choice_fixup(yopt):
 	yopt_str = ""
 	if yopt.atype == typ_string:
-		yopt_str += "if (!%s) {\n" % opt_sname(yopt)
-		if yopt.otype == opt_argument:
-			yopt_str += "\tyopt_print(\"No value for %s\\n\");\n" % opt_pname(yopt)
-			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
-		else:
+		if yopt.otype == opt_option:
+			yopt_str += "if (!%s) {\n" % opt_sname(yopt)
 			yopt_str += "\t;\n"
-		yopt_str += "} else "
+			yopt_str += "} else "
 
 		for ch in yopt.choice:
 			vals = getattr(ch, "aliases", None) or []
@@ -662,6 +659,8 @@ def gen_choice_fixup(yopt):
 
 
 for yopt in yopts:
+	if yopt.otype == opt_argument:
+		continue
 	if not len(yopt.choice):
 		continue
 
@@ -676,6 +675,7 @@ arg_assign_str = \
 "	case %d:\n\
 		dprint(\"%s assigned to %%s\\n\", arg);\n\
 		%s = %s;\n\
+%s\
 %s\
 		break;\n\
 "
@@ -702,7 +702,13 @@ for yopt in yopts:
 		cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x.val), yopt.schoice)
 		spec_check = arg_spec_check_str % " || ".join(cmps)
 
-	yopt_str += arg_assign_str % (args_nr, opt_sname(yopt), opt_sname(yopt), arg_assign, spec_check)
+	ch_fix_str = ""
+	if len(yopt.choice):
+		ch_fix_str = gen_choice_fixup(yopt)
+		ch_fix_str = c_indent("\t\t", ch_fix_str)
+		
+
+	yopt_str += arg_assign_str % (args_nr, opt_sname(yopt), opt_sname(yopt), arg_assign, spec_check, ch_fix_str)
 	args_nr += 1
 
 yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)
