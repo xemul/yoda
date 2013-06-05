@@ -343,23 +343,31 @@ for yopt in yopts:
 				sys.exit(1)
 
 			if y.otype == opt_option:
-				continue
+				# option depening on other option
+				# should be added to that other's
+				# groups
+				if not getattr(y, "in_groups", None):
+					print "Target option unclassified, reshuffle options"
+					sys.exit(1)
 
-			if not active_classifier:
-				active_classifier = y
-			elif y != active_classifier:
-				print "More than one active classifier."
-				sys.exit(1)
+				ygrps.extend(y.in_groups)
+			else:
+				if not active_classifier:
+					active_classifier = y
+				elif y != active_classifier:
+					print "More than one active classifier."
+					sys.exit(1)
 
-			if not yopt_groups.has_key(exp_str):
-				yopt_groups[exp_str] = ygroup(eps[2].strip().replace("-", "_"))
+				if not yopt_groups.has_key(exp_str):
+					yopt_groups[exp_str] = ygroup(eps[2].strip().replace("-", "_"))
 
-			ygrps.append(yopt_groups[exp_str])
+				ygrps.append(yopt_groups[exp_str])
 
 		if not ygrps:
 			ygrps = [ yopt_groups["generic"] ]
 
 
+	yopt.in_groups = []
 	for ygrp in ygrps:
 		if getattr(yopt, "lname", None):
 			y = yopt_find_l(yopt.lname, ygrp.yopts)
@@ -372,6 +380,7 @@ for yopt in yopts:
 				print "Duplicate option short name %s" % yopt.sname
 
 		ygrp.yopts.append(yopt)
+		yopt.in_groups.append(ygrp)
 
 # Name of yopts struct member
 def opt_cname(yopt):

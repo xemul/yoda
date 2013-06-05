@@ -55,6 +55,7 @@ option	/v
 option	address
 	string		ADDRess of page server
 	req_for		page-server
+	for		action = page-server
 
 option	port
 	int		PORT of page server
