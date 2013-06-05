@@ -206,7 +206,7 @@ for l in yfile:
 		yc.val = css.pop(0)
 		if yc.val.startswith("!"):
 			yc.val = yc.val.lstrip("!")
-			yopt.schoice.append(yc)
+			yc.schoice = True
 
 		if len(css):
 			yc.aliases = css
@@ -676,7 +676,9 @@ def gen_choice_fixup(yopt):
 			cmps = " || ".join(cmps)
 			yopt_str += "if (%s) {\n" % cmps
 			yopt_str += "\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
-			if yopt == active_classifier:
+			if getattr(ch, "schoice", None):
+				yopt_str += "\treturn -1;\n"
+			elif yopt == active_classifier:
 				ykey = "%s = %s" % (yopt.lname, ch.val)
 				if yopt_groups.has_key(ykey):
 					yopt_str += "\tycur = &%s_set;\n" % yopt_groups[ykey].name
@@ -736,11 +738,6 @@ for yopt in yopts:
 
 	if len(yopt.choice):
 		yopt_str += c_indent("\t", gen_choice_fixup(yopt))
-
-	if len(yopt.schoice):
-		cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x.val), yopt.schoice)
-		yopt_str += "\tif (%s)\n" % " || ".join(cmps)
-		yopt_str += "\t\treturn -1;\n"
 
 	yopt_str += "\tbreak;\n"
 
