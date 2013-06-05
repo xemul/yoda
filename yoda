@@ -714,6 +714,22 @@ for yopt in yopts:
 yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)
 yincode = yincode.replace("${NR_ARGS}", "%d" % args_nr)
 
+yopt_str = ""
+arg_nr = 0
+for yopt in yopts:
+	if yopt.otype != opt_argument:
+		continue
+
+	yopt_str += "if (yopt_next_arg <= %d) {\n" % arg_nr
+	yopt_str += "\tyopt_print(\"Argument %s missing\\n\");\n" % opt_pname(yopt)
+	yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+	yopt_str += "}\n\n"
+
+	arg_nr += 1
+
+yopt_str = c_indent("\t", yopt_str)
+yincode = yincode.replace("${CHECK_ARGS}", yopt_str)
+
 # Expressions generator
 
 def yoda_gen_one_cexp(exp):

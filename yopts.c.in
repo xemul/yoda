@@ -28,9 +28,11 @@ struct yopts ${PROJ}_yopts = {
 static int ${PROJ}_yopts_usage(char *prog, int ret);
 static int ${PROJ}_yopts_fixup_choices(void);
 static int ${PROJ}_yopts_parse_arg(char *arg);
+static int ${PROJ}_yopts_check_args(void);
 static int ${PROJ}_yopts_check_reqs(void);
 static int yopt_err = YOPTS_PARSE_OK;
 static const int yopt_nr_args = ${NR_ARGS};
+static int yopt_next_arg = 0;
 int yopt_tail;
 
 #define YOPTARG_SET	((char *)-1)
@@ -119,6 +121,7 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		if (yopt_err)
 			return ${PROJ}_yopts_usage(argv[0], yopt_err);
 	}
+
 stop_scan:
 	yopt_tail += optind;
 
@@ -126,6 +129,12 @@ stop_scan:
 		return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
 	if (${PROJ}_yopts.version)
 		return YOPTS_PARSE_SPECIAL;
+
+	if (ret == YOPTS_PARSE_OK) {
+		yopt_err = ${PROJ}_yopts_check_args();
+		if (yopt_err)
+			return yopt_err;
+	}
 
 	yopt_err = ${PROJ}_yopts_fixup_choices();
 	if (yopt_err)
@@ -140,14 +149,20 @@ stop_scan:
 
 static int ${PROJ}_yopts_parse_arg(char *arg)
 {
-	static int carg = 0;
-
-	switch (carg) {
+	switch (yopt_next_arg) {
 ${ASSIGN_ARGS}
 	}
 
-	carg++;
-	return carg == yopt_nr_args;
+	yopt_next_arg++;
+	return yopt_next_arg == yopt_nr_args;
+}
+
+static int ${PROJ}_yopts_check_args(void)
+{
+	yopt_err = YOPTS_PARSE_OK;
+
+${CHECK_ARGS}
+	return yopt_err;
 }
 
 static int ${PROJ}_yopts_fixup_choices(void)
