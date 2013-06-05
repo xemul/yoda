@@ -80,6 +80,21 @@ struct yopt_set {
 	int (*assign)(int opt, char **argv);
 };
 
+static int generic_assign(int opt, char **argv);
+
+static def_assign(int opt, char **argv, bool generic)
+{
+	if (generic) {
+		if (opt == 1)
+			return ${PROJ}_yopts_parse_arg(argv[optind - 1]);
+
+		yopt_err = YOPTS_PARSE_ERR;
+		return 0;
+	}
+
+	return generic_assign(opt, argv);
+}
+
 ${YSETS}
 
 static struct yopt_set *ycur = &generic_set;
@@ -108,14 +123,17 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 				goto stop_scan;
 			}
 
-			dprint("Reset arg scan to permutating\n");
+			dprint("Switching opt array (%d)\n", opt);
 			/* reset getopt_long to normal (permutating) scan */
 			optind--;
 			argc -= optind;
 			argv += optind;
 			yopt_tail += optind;
 			optind = 0;
-			permutate = true;
+			if (opt != 2) {
+				dprint("Reset arg scan to permutating\n");
+				permutate = true;
+			}
 		}
 
 		if (yopt_err)
@@ -149,12 +167,18 @@ stop_scan:
 
 static int ${PROJ}_yopts_parse_arg(char *arg)
 {
+	bool new_set = false;
+
 	switch (yopt_next_arg) {
 ${ASSIGN_ARGS}
 	}
 
 	yopt_next_arg++;
-	return yopt_next_arg == yopt_nr_args;
+	if (yopt_next_arg == yopt_nr_args)
+		return 1;
+	if (new_set)
+		return 2;
+	return 0;
 }
 
 static int ${PROJ}_yopts_check_args(void)

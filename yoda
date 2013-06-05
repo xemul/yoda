@@ -43,13 +43,14 @@ class ychoice:
 	pass
 
 class ygroup:
-	def __init__(self):
+	def __init__(self, name):
 		self.yopts = []
 		self.parent = None
+		self.name = name
 	pass
 
 yopt_groups = {}
-yopt_groups["generic"] = ygroup()
+yopt_groups["generic"] = ygroup("generic")
 
 #
 # Our own command line
@@ -268,6 +269,7 @@ yopt = yoption(opt_option)
 yopt.lname = "help"
 yopt.atype = typ_boolean
 yopt.summary = "show help text"
+yopt.genonly = True
 if short_help:
 	yopt.sname = short_help
 elif "h" in std_shorts:
@@ -284,6 +286,7 @@ yopt = yoption(opt_option)
 yopt.lname = "version"
 yopt.atype = typ_boolean
 yopt.summary = "show version"
+yopt.genonly = True
 if short_version:
 	yopt.sname = short_version
 elif "v" in std_shorts:
@@ -325,7 +328,8 @@ for yopt in yopts:
 	else:
 		for exp in exps:
 			exp_str = "%s" % exp.strip()
-			ep = exp_str.partition("=")[0].strip()
+			eps = exp_str.partition("=")
+			ep = eps[0].strip()
 			y = yopt_find_l(ep)
 			if not y:
 				print "No option for expression with %s" % ep
@@ -341,7 +345,7 @@ for yopt in yopts:
 				sys.exit(1)
 
 			if not yopt_groups.has_key(exp_str):
-				yopt_groups[exp_str] = ygroup()
+				yopt_groups[exp_str] = ygroup(eps[2].strip().replace("-", "_"))
 
 			ygrps.append(yopt_groups[exp_str])
 
@@ -512,13 +516,15 @@ yincode = yincode.replace("${DEFAULTS}", yopt_str)
 # Generate option sets
 #
 
-def gen_opt_set(name, yopts):
+def gen_opt_set(name, yopts, ng_yopts):
 	yscode = yinscode.replace("${YSET}", name)
 
 	# Generate and put short options array
 	yopt_str = ""
 	for yopt in yopts:
 		if not getattr(yopt, "sname", None):
+			continue
+		if ng_yopts and getattr(yopt, "genonly", None):
 			continue
 
 		yopt_str += yopt.sname
@@ -543,6 +549,8 @@ def gen_opt_set(name, yopts):
 		if yopt.otype != opt_option:
 			continue
 		if not getattr(yopt, "lname", None):
+			continue
+		if ng_yopts and getattr(yopt, "genonly", None):
 			continue
 
 		if yopt.atype == typ_boolean:
@@ -573,8 +581,14 @@ def gen_opt_set(name, yopts):
 		else:
 			return yopt.optarg
 
+	if not ng_yopts:
+		yscode = yscode.replace("${GENERIC}", "true")
+		ng_yopts = yopts
+	else:
+		yscode = yscode.replace("${GENERIC}", "false")
+
 	yopt_str = ""
-	for yopt in yopts:
+	for yopt in ng_yopts:
 		if yopt.otype != opt_option:
 			continue
 
@@ -606,13 +620,30 @@ def gen_opt_set(name, yopts):
 
 	return yscode.replace("${OPTS_ASSIGN}", yopt_str);
 
-yinscode = gen_opt_set("generic", yopts)
+#yinscode = gen_opt_set("generic", yopts)
+
+def gen_opt_set_grp(ygrp):
+	if ygrp.name == "generic":
+		return gen_opt_set("generic", ygrp.yopts, None)
+
+	yopts = []
+	yopts.extend(ygrp.yopts)
+	yopts.extend(yopt_groups["generic"].yopts)
+
+	return gen_opt_set(ygrp.name, yopts, ygrp.yopts)
+
+yinsscode = ""
+for gname in yopt_groups:
+	ygrp = yopt_groups[gname]
+	yinsscode += "/*\n * Set for %s\n */\n" % ygrp.name
+	yinsscode += gen_opt_set_grp(ygrp)
+	yinsscode += "/* End of %s set */\n" % ygrp.name
 
 #
 # End generating sets -- put them into main .c file
 #
 
-yincode = yincode.replace("${YSETS}", yinscode)
+yincode = yincode.replace("${YSETS}", yinsscode)
 
 # Generate validation routine (choices)
 yopt_str = ""
@@ -635,6 +666,11 @@ def gen_choice_fixup(yopt):
 			cmps = " || ".join(cmps)
 			yopt_str += "if (%s) {\n" % cmps
 			yopt_str += "\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
+			if yopt == active_classifier:
+				ykey = "%s = %s" % (yopt.lname, ch.val)
+				if yopt_groups.has_key(ykey):
+					yopt_str += "\tycur = &%s_set;\n" % yopt_groups[ykey].name
+					yopt_str += "\tnew_set = true;\n"
 			yopt_str += "} else "
 
 		yopt_str += " {\n"

@@ -10,11 +10,8 @@ static int ${YSET}_assign(int opt, char **argv)
 
 	switch (opt) {
 	${OPTS_ASSIGN}
-	case 1:
-		ret = ${PROJ}_yopts_parse_arg(argv[optind - 1]);
-		break;
 	default:
-		yopt_err = YOPTS_PARSE_ERR;
+		ret = def_assign(opt, argv, ${GENERIC});
 		break;
 	}
 
