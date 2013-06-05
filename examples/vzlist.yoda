@@ -38,3 +38,5 @@ option	list/L
 
 option	/1
 	bool	synonym for --no-header --output ctid
+	imply	no-header
+	imply	output = ctid
