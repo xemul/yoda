@@ -145,7 +145,7 @@ static int yopts_check_reqs(void)
 {
 	yopt_err = YOPTS_PARSE_OK;
 
-	${CHECK_REQS}
+${CHECK_REQS}
 	return yopt_err;
 }
 

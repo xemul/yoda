@@ -840,19 +840,20 @@ def yoda_get_group_desc(exp_str):
 yopt_str = ""
 for yopt in yopts:
 	if getattr(yopt, "required_for", None):
-		yopt_str += "if (%s) {\n\t\t" % yoda_gen_cexpression(yopt.required_for)
-		yopt_str += "if (!%s) {\n\t\t" % opt_sname(yopt)
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t\t"
-		yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t\t" % opt_pname(yopt)
-		yopt_str += "}\n\t"
-		yopt_str += "}\n\n\t"
+		yopt_str += "if (%s) {\n" % yoda_gen_cexpression(yopt.required_for)
+		yopt_str += "\tif (!%s) {\n" % opt_sname(yopt)
+		yopt_str += "\t\tyopt_err = YOPTS_PARSE_ERR;\n"
+		yopt_str += "\t\tyopt_print(\"Option %s required\\n\");\n" % opt_pname(yopt)
+		yopt_str += "\t}\n"
+		yopt_str += "}\n\n"
 
 	if getattr(yopt, "conflicts", None):
-		yopt_str += "if (%s && (%s)) {\n\t\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
-		yopt_str += "yopt_err = YOPTS_PARSE_ERR;\n\t\t"
-		yopt_str += "yopt_print(\"Option %s conflict\\n\");\n\t" % opt_pname(yopt)
-		yopt_str += "}\n\t"
+		yopt_str += "if (%s && (%s)) {\n" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+		yopt_str += "\tyopt_print(\"Option %s conflict\\n\");\n" % opt_pname(yopt)
+		yopt_str += "}\n\n"
 
+yopt_str = c_indent("\t", yopt_str)
 yincode = yincode.replace("${CHECK_REQS}", yopt_str)
 
 # Generate usage text
