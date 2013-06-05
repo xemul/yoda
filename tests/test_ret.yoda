@@ -1,0 +1,21 @@
+arg	action
+	string	action to perform
+	choice	start		start something
+	choice	stop		stop something
+
+option	id/i
+	int	ID of something
+
+option	/y
+	bool	want something
+
+option	str/s
+	string	something about someone
+
+option	stop-opt
+	bool	required for stop
+	req_for action = stop
+
+option opt-for-stop-opt
+	bool required for --stop-opt
+	req_for stop-opt
