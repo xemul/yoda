@@ -14,5 +14,6 @@ struct yopts {
 
 extern struct yopts ${PROJ}_yopts;
 extern int ${PROJ}_yopts_parse(int argc, char **argv);
+extern void ${PROJ}_yopts_usage(char *prog);
 
 ${CHOICES}

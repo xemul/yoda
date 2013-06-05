@@ -25,7 +25,19 @@ struct yopts ${PROJ}_yopts = {
 	${DEFAULTS}
 };
 
-static int ${PROJ}_yopts_usage(char *prog, int ret);
+static int yopts_usage(char *prog, int ret)
+{
+	printf("Usage:\n"
+${USAGE}
+	);
+	return ret;
+}
+
+void ${PROJ}_yopts_usage(char *prog)
+{
+	yopts_usage(prog, 0);
+}
+
 static int ${PROJ}_yopts_fixup_choices(void);
 static int ${PROJ}_yopts_parse_arg(char *arg);
 static int ${PROJ}_yopts_check_args(void);
@@ -137,14 +149,14 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		}
 
 		if (yopt_err)
-			return ${PROJ}_yopts_usage(argv[0], yopt_err);
+			return yopts_usage(argv[0], yopt_err);
 	}
 
 stop_scan:
 	yopt_tail += optind;
 
 	if (${PROJ}_yopts.help)
-		return ${PROJ}_yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
+		return yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
 	if (${PROJ}_yopts.version)
 		return YOPTS_PARSE_SPECIAL;
 
@@ -203,12 +215,4 @@ static int ${PROJ}_yopts_check_reqs(void)
 
 	${CHECK_REQS}
 	return yopt_err;
-}
-
-static int ${PROJ}_yopts_usage(char *prog, int ret)
-{
-	printf("Usage:\n"
-${USAGE}
-	);
-	return ret;
 }
