@@ -645,7 +645,15 @@ def gen_opt_set(name, yopts, ng_yopts):
 				print "No target option for %s implication" % impl
 				sys.exit(1)
 
-			yopt_str += opt_assign_code(iyopt, cstrval(imps[2].strip()))
+			if iyopt.atype == typ_boolean:
+				if imps[2]:
+					print "No value for boolean imply"
+					sys.exit(1)
+				iassign = "NULL"
+			else:
+				iassign = cstrval(imps[2].strip())
+
+			yopt_str += opt_assign_code(iyopt, iassign)
 
 		yopt_str += "\t\tbreak;"
 
