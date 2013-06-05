@@ -115,11 +115,21 @@ def make_dash_alias(name):
 
 sopt_rover = next_rover(1)
 
+lcollect = ""
 for l in yfile:
+	l = l.strip()
 	if (l.startswith("#")):
 		continue
 
-	ls = l.strip().split(None, 1)
+	if (l.endswith("\\")):
+		lcollect += " " + l.rstrip("\\")
+		continue
+
+	if lcollect:
+		l = lcollect + " " + l
+		lcollect = ""
+
+	ls = l.split(None, 1)
 	if (not ls):
 		continue
 

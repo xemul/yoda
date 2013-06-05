@@ -26,7 +26,8 @@ option	/s
 
 option	/d
 	string	device to work on
-	req_for	command = umount | command = merge | command = snapshot | command = start | command = stop | command = clear | command = delete
+	req_for	command = umount | command = merge | command = snapshot | \
+		command = start | command = stop | command = clear | command = delete
 
 option	/f
 	string	format of the disk
