@@ -84,7 +84,7 @@ static struct yopt_set *ycur = &generic_set;
 
 int ${PROJ}_yopts_parse(int argc, char **argv)
 {
-	int opt, idx;
+	int opt, idx, ret = YOPTS_PARSE_OK;
 	bool permutate = false;
 
 	if (!yopt_nr_args)
@@ -101,8 +101,10 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 
 		opt = ycur->assign(opt, argv);
 		if (opt) {
-			if (opt < 0)
+			if (opt < 0) {
+				ret = YOPTS_PARSE_SPECIAL;
 				goto stop_scan;
+			}
 
 			dprint("Reset arg scan to permutating\n");
 			/* reset getopt_long to normal (permutating) scan */
@@ -133,7 +135,7 @@ stop_scan:
 	if (yopt_err)
 		return yopt_err;
 
-	return YOPTS_PARSE_OK;
+	return ret;
 }
 
 static int ${PROJ}_yopts_parse_arg(char *arg)
