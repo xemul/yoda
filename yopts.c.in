@@ -25,6 +25,14 @@ struct yopts ${PROJ}_yopts = {
 	${DEFAULTS}
 };
 
+int yopt_tail;
+
+static int yopt_err = YOPTS_PARSE_OK;
+static const int yopt_nr_args = ${NR_ARGS};
+static int yopt_next_arg = 0;
+
+#define YOPTARG_SET	((char *)-1)
+
 static int yopts_usage(char *prog, int ret)
 {
 	printf("Usage:\n"
@@ -37,17 +45,6 @@ void ${PROJ}_yopts_usage(char *prog)
 {
 	yopts_usage(prog, 0);
 }
-
-static int ${PROJ}_yopts_fixup_choices(void);
-static int ${PROJ}_yopts_parse_arg(char *arg);
-static int ${PROJ}_yopts_check_args(void);
-static int ${PROJ}_yopts_check_reqs(void);
-static int yopt_err = YOPTS_PARSE_OK;
-static const int yopt_nr_args = ${NR_ARGS};
-static int yopt_next_arg = 0;
-int yopt_tail;
-
-#define YOPTARG_SET	((char *)-1)
 
 __attribute__((weak)) void yopt_print(const char *format, ...)
 {
@@ -93,12 +90,13 @@ struct yopt_set {
 };
 
 static int generic_assign(int opt, char **argv);
+static int yopts_parse_arg(char *arg);
 
 static def_assign(int opt, char **argv, bool generic)
 {
 	if (generic) {
 		if (opt == 1)
-			return ${PROJ}_yopts_parse_arg(argv[optind - 1]);
+			return yopts_parse_arg(argv[optind - 1]);
 
 		yopt_err = YOPTS_PARSE_ERR;
 		return 0;
@@ -110,6 +108,46 @@ static def_assign(int opt, char **argv, bool generic)
 ${YSETS}
 
 static struct yopt_set *ycur = &generic_set;
+
+static int yopts_fixup_choices(void)
+{
+	yopt_err = YOPTS_PARSE_OK;
+
+${FIX_CHOICES}
+	return yopt_err;
+}
+
+static int yopts_parse_arg(char *arg)
+{
+	bool new_set = false;
+
+	switch (yopt_next_arg) {
+${ASSIGN_ARGS}
+	}
+
+	yopt_next_arg++;
+	if (yopt_next_arg == yopt_nr_args)
+		return 1;
+	if (new_set)
+		return 2;
+	return 0;
+}
+
+static int yopts_check_args(void)
+{
+	yopt_err = YOPTS_PARSE_OK;
+
+${CHECK_ARGS}
+	return yopt_err;
+}
+
+static int yopts_check_reqs(void)
+{
+	yopt_err = YOPTS_PARSE_OK;
+
+	${CHECK_REQS}
+	return yopt_err;
+}
 
 int ${PROJ}_yopts_parse(int argc, char **argv)
 {
@@ -161,58 +199,18 @@ stop_scan:
 		return YOPTS_PARSE_SPECIAL;
 
 	if (ret == YOPTS_PARSE_OK) {
-		yopt_err = ${PROJ}_yopts_check_args();
+		yopt_err = yopts_check_args();
 		if (yopt_err)
 			return yopt_err;
 	}
 
-	yopt_err = ${PROJ}_yopts_fixup_choices();
+	yopt_err = yopts_fixup_choices();
 	if (yopt_err)
 		return yopt_err;
 
-	yopt_err = ${PROJ}_yopts_check_reqs();
+	yopt_err = yopts_check_reqs();
 	if (yopt_err)
 		return yopt_err;
 
 	return ret;
-}
-
-static int ${PROJ}_yopts_parse_arg(char *arg)
-{
-	bool new_set = false;
-
-	switch (yopt_next_arg) {
-${ASSIGN_ARGS}
-	}
-
-	yopt_next_arg++;
-	if (yopt_next_arg == yopt_nr_args)
-		return 1;
-	if (new_set)
-		return 2;
-	return 0;
-}
-
-static int ${PROJ}_yopts_check_args(void)
-{
-	yopt_err = YOPTS_PARSE_OK;
-
-${CHECK_ARGS}
-	return yopt_err;
-}
-
-static int ${PROJ}_yopts_fixup_choices(void)
-{
-	yopt_err = YOPTS_PARSE_OK;
-
-${FIX_CHOICES}
-	return yopt_err;
-}
-
-static int ${PROJ}_yopts_check_reqs(void)
-{
-	yopt_err = YOPTS_PARSE_OK;
-
-	${CHECK_REQS}
-	return yopt_err;
 }
