@@ -845,14 +845,7 @@ for yopt in yopts:
 		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n\t\t"
 		yopt_str += "\tyopt_print(\"Option %s required\\n\");\n\t\t" % opt_pname(yopt)
 		yopt_str += "}\n\t"
-		if getattr(yopt, "optional_for", None):
-			yopt_str += "} else "
-		else:
-			yopt_str += "}\n\n\t"
-
-	if getattr(yopt, "optional_for", None):
-		yopt_str += "if (%s && !(%s))\n\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.optional_for))
-		yopt_str += "\tyopt_print(\"Option %s is useless\\n\");\n\n\t" % opt_pname(yopt)
+		yopt_str += "}\n\n\t"
 
 	if getattr(yopt, "conflicts", None):
 		yopt_str += "if (%s && (%s)) {\n\t\t" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
