@@ -82,7 +82,7 @@ def_req_for = None
 def_pile = False
 auto_alias_dashed = False
 
-def yopt_find_l(s):
+def yopt_find_l(s, yopts):
 	if not s:
 		return None
 
@@ -92,7 +92,7 @@ def yopt_find_l(s):
 	else:
 		return None
 
-def yopt_find_s(s):
+def yopt_find_s(s, yopts):
 	res = filter(lambda x: getattr(x, "sname", None) == s, yopts)
 	if len(res):
 		return res[0]
@@ -128,21 +128,11 @@ for l in yfile:
 		ln = ls[1].split("/")
 
 		yopt.lname = ln.pop(0)
-		yex = yopt_find_l(yopt.lname)
-		if yex:
-			print "Duplicate option name %s\n" % yopt.lname
-			sys.exit(1)
 
 		if len(ln):
 			yopt.sname = ln.pop(0)
-			if yopt.sname:
-				yex = yopt_find_s(yopt.sname)
-				if yex:
-					print "Duplicate short option name %s\n" % yopt.sname
-					sys.exit(1)
-
-				if yopt.sname in std_shorts:
-					std_shorts.remove(yopt.sname)
+			if yopt.sname and (yopt.sname in std_shorts):
+				std_shorts.remove(yopt.sname)
 
 		if len(ln):
 			yopt.laliases = ln
@@ -330,7 +320,7 @@ for yopt in yopts:
 			exp_str = "%s" % exp.strip()
 			eps = exp_str.partition("=")
 			ep = eps[0].strip()
-			y = yopt_find_l(ep)
+			y = yopt_find_l(ep, yopts)
 			if not y:
 				print "No option for expression with %s" % ep
 				sys.exit(1)
@@ -354,6 +344,16 @@ for yopt in yopts:
 
 
 	for ygrp in ygrps:
+		if getattr(yopt, "lname", None):
+			y = yopt_find_l(yopt.lname, ygrp.yopts)
+			if y:
+				print "Duplicate option long name %s" % yopt.lname
+				sys.exit(1)
+		if getattr(yopt, "sname", None):
+			y = yopt_find_s(yopt.sname, ygrp.yopts)
+			if y:
+				print "Duplicate option short name %s" % yopt.sname
+
 		ygrp.yopts.append(yopt)
 
 # Name of yopts struct member

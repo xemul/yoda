@@ -37,8 +37,9 @@ option	/f
 
 option	block-size/b
 	int	block size
+	for	command = init
 
-option	max-balloon
+option	max-balloon/b
 	bool	inflate maximal balloon
 	for	command = resize
 
@@ -86,6 +87,6 @@ option	no-header/H
 	bool	don't print header
 	for	command = snapshot-list
 
-option	output
+option	output/o
 	string	output ForMaT
 	for	command = snapshot-list
