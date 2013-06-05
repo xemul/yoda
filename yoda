@@ -339,7 +339,7 @@ for yopt in yopts:
 
 			ygrps.append(yopt_groups[exp_str])
 
-		if not exps:
+		if not ygrps:
 			ygrps = [ yopt_groups["generic"] ]
 
 
