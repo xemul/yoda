@@ -29,7 +29,7 @@ typ_integer = 2
 typ_string = 3
 typ_path = 4
 
-generators = [ "cparser" ]
+generators = [ "cparser", "bashcomp" ]
 
 class yoption:
 	def __init__(self, otype):
@@ -1040,5 +1040,24 @@ def generate_cparser():
 
 # End of cparser generator (generate_cparser)
 
+def generate_bashcomp():
+	if arg_opts.output:
+		b_file = arg_opts.output
+	else:
+		b_file = "%s_comp.sh" % yname
+
+	yinfile = open(os.path.join(arg_opts.dir, "ycomp.sh.in"))
+	yincode = yinfile.read()
+	yincode = yincode.replace("%{PROJ}", yname)
+
+
+	youtfile = open(b_file, "w")
+	youtfile.write(yincode)
+	yinfile.close()
+	youtfile.close()
+	pass
+
 if arg_opts.generate == "cparser":
 	generate_cparser()
+elif arg_opts.generate == "bashcomp":
+	generate_bashcomp()
