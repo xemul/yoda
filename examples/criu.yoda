@@ -114,7 +114,7 @@ option	daemon
 	for		action = page-server
 
 option	file/f
-	string		show contents of a checkpoint FILE
+	path		show contents of a checkpoint FILE
 	for		action = show
 
 option	contents/c
