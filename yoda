@@ -276,7 +276,6 @@ yopt = yoption(opt_option)
 yopt.lname = "help"
 yopt.atype = typ_boolean
 yopt.summary = "show help text"
-yopt.genonly = True
 if short_help:
 	yopt.sname = short_help
 elif "h" in std_shorts:

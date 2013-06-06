@@ -33,17 +33,16 @@ static int yopt_next_arg = 0;
 
 #define YOPTARG_SET	((char *)-1)
 
-static int yopts_usage(char *prog, int ret)
+static void yopts_usage(char *prog)
 {
 	printf("Usage:\n"
 ${USAGE}
 	);
-	return ret;
 }
 
 void ${PROJ}_yopts_usage(char *prog)
 {
-	yopts_usage(prog, 0);
+	yopts_usage(prog);
 }
 
 __attribute__((weak)) void yopt_print(const char *format, ...)
@@ -167,10 +166,23 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 		}
 
 		opt = ycur->assign(opt, argv);
+
+		if (${PROJ}_yopts.version)
+			return YOPTS_PARSE_SPECIAL;
+
+		if (${PROJ}_yopts.help)
+			yopt_err = YOPTS_PARSE_SPECIAL;
+
+		if (yopt_err) {
+			if (!yopt_next_arg)
+				yopts_usage(argv[0]);
+			return yopt_err;
+		}
+
 		if (opt) {
 			if (opt < 0) {
 				ret = YOPTS_PARSE_SPECIAL;
-				goto stop_scan;
+				break;
 			}
 
 			dprint("Switching opt array (%d)\n", opt);
@@ -185,18 +197,9 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 				permutate = true;
 			}
 		}
-
-		if (yopt_err)
-			return yopts_usage(argv[0], yopt_err);
 	}
 
-stop_scan:
 	yopt_tail += optind;
-
-	if (${PROJ}_yopts.help)
-		return yopts_usage(argv[0], YOPTS_PARSE_SPECIAL);
-	if (${PROJ}_yopts.version)
-		return YOPTS_PARSE_SPECIAL;
 
 	if (ret == YOPTS_PARSE_OK) {
 		yopt_err = yopts_check_args();
