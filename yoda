@@ -435,6 +435,10 @@ if not arg_opts.generate in generators:
 		(arg_opts.generate, ", ".join(generators))
 	sys.exit(0)
 
+def c_indent(istr, code):
+	return istr + istr.join(code.splitlines(True))
+	
+
 def generate_cparser():
 	##
 	#	
@@ -695,9 +699,6 @@ def generate_cparser():
 	
 	# Generate validation routine (choices)
 	yopt_str = ""
-	
-	def c_indent(istr, code):
-		return istr + istr.join(code.splitlines(True))
 	
 	def gen_choice_fixup(yopt):
 		yopt_str = ""
@@ -1050,6 +1051,76 @@ def generate_bashcomp():
 	yincode = yinfile.read()
 	yincode = yincode.replace("%{PROJ}", yname)
 
+	# Generate arguments for options with such
+	yopt_str=""
+	for yopt in yopts:
+		if yopt.otype != opt_option:
+			continue
+		if opt_deprecated(yopt):
+			continue
+		if yopt.atype == typ_boolean:
+			continue
+
+		comp_gen=""
+		if yopt.atype == typ_path:
+			comp_gen="-f"
+		elif len(yopt.choice):
+			comp_gen="-W \"%s\" --" % " ".join(map(lambda x: x.val, yopt.choice))
+
+		if comp_gen:
+			comp_gen="$(compgen %s ${cur})" % comp_gen
+
+		yopt_str += "\"%s\")\n" % opt_pname(yopt)
+		yopt_str += "\tCOMPREPLY=(%s)\n" % comp_gen
+		yopt_str += "\treturn 0\n"
+		yopt_str += "\t;;\n"
+
+	yopt_str = c_indent("\t\t", yopt_str)
+	yincode = yincode.replace("%{OPTS_ARGS}", yopt_str)
+
+	ygrp=yopt_groups["generic"]
+	gen_comp_words=" ".join(map(lambda x: opt_pname(x), ygrp.yopts))
+
+	# Generate context scanning
+
+	yopt_str=""
+	yopt = active_classifier
+	if yopt and len(yopt.choice):
+		for ch in yopt.choice:
+			ygrp=yopt_groups["%s = %s" % (yopt.lname, ch.val)]
+			comp_words=" ".join(map(lambda x: opt_pname(x), ygrp.yopts))
+
+			yopt_str += "\"%s\")\n" % ch.val
+			yopt_str += "\tCOMPREPLY=( $(compgen -W \"%s\" -- ${cur}))\n" % (comp_words + " " + gen_comp_words)
+			yopt_str += "\treturn 0\n"
+			yopt_str += "\t;;\n"
+
+		for yopt in yopts:
+			if yopt.otype != opt_option:
+				continue
+			if yopt.atype == typ_boolean:
+				continue
+
+			yopt_str += "\"%s\")\n" % opt_pname(yopt)
+			yopt_str += "\t((i++))\n"
+			yopt_str += "\t;;\n"
+
+	yopt_str = c_indent("\t\t", yopt_str)
+	yincode = yincode.replace("%{CTX_SCAN}", yopt_str)
+
+	# Generate top level args and gen options
+
+	yopt_str=""
+	yopt = active_classifier
+	comp_words=""
+	if yopt and len(yopt.choice):
+		comp_words = " ".join(map(lambda x: x.val, yopt.choice))
+
+	yopt_str += "COMPREPLY=( $(compgen -W \"%s\" -- ${cur}) )\n" % (comp_words + " " + gen_comp_words)
+	yopt_str += "return 0\n"
+
+	yopt_str = c_indent("\t", yopt_str)
+	yincode = yincode.replace("%{ARGS_N_GEN}", yopt_str)
 
 	youtfile = open(b_file, "w")
 	youtfile.write(yincode)

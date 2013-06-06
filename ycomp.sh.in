@@ -3,16 +3,19 @@ ycomp_%{PROJ}()
 	local cur prev cl_arg
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
-
-%{COMP_ARGS}
-
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-%{COMP_OPT_ARGS}
+	case "$prev" in
+%{OPTS_ARGS}
+	esac
 
-	cmd="${COMP_WORDS[%{CL_ARG}]}"
+	for ((i=1; i<${#COMP_WORDS[@]}; i++)); do
+		case ${COMP_WORDS[i]} in
+%{CTX_SCAN}
+		esac
+	done
 
-%{COMP_OPTS}
+%{ARGS_N_GEN}
 }
 
 complete -F ycomp_%{PROJ} %{PROJ}
