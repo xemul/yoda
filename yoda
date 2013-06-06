@@ -67,6 +67,8 @@ if arg_opts.file == None or arg_opts.name == None:
 	arg_parser.print_help()
 	sys.exit(1)
 
+yname = arg_opts.name;
+	
 # Read yoda file in
 
 yfile = open(arg_opts.file)
@@ -433,606 +435,610 @@ if not arg_opts.generate in generators:
 		(arg_opts.generate, ", ".join(generators))
 	sys.exit(0)
 
-##
-#	
-# Generate sources
-#
-##
-
-yname = arg_opts.name;
-
-if arg_opts.output:
-	c_files = arg_opts.output.split(":")
-else:
-	c_files = [ "%s_yopts.h" % yname, "%s_yopts.c" % yname ]
-
-ctypes = {
-	typ_boolean:	"bool",
-	typ_integer:	"int",
-	typ_string:	"char *",
-	typ_path:	"char *",
-}
-
-#
-# Generate the .h file
-#
-
-yinfile = open(os.path.join(arg_opts.dir, "yopts.h.in"))
-yincode = yinfile.read()
-yincode = yincode.replace("${PROJ}", yname)
-
-# Generate the yopts structure
-yopt_str = ""
-def opt_vdecl(vtyp, vname, ptr = False):
-	return "%s%s %s;\n\t" % (ctypes[vtyp], ptr and "*" or "", vname)
-
-for yopt in yopts:
-	if yopt.pile:
-		yopt_str += opt_vdecl(typ_integer, opt_cname(yopt) + "_nr")
-	# For non ints with choice generate numerical constants
-	# for faster comparisons in the code
-	if len(yopt.choice) and (yopt.atype != typ_integer):
-		yopt_str += opt_vdecl(typ_integer, opt_cname(yopt) + "_code")
-
-	yopt_str += opt_vdecl(yopt.atype, opt_cname(yopt), yopt.pile)
-
-yincode = yincode.replace("${STRUCTURE}", yopt_str)
-
-# Generate constants for choice-d options and arguments
-yopt_str = ""
-enum_decl_str = "\
-enum {\n\
-%s\
-};\n\n"
-
-for yopt in yopts:
-	if not len(yopt.choice):
-		continue
-
-	for ch in yopt.choice:
-		ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
-
-	vals = map(lambda x: "\t%s,\n" % x.ccode, yopt.choice)
-	yopt_str += enum_decl_str % "".join(vals)
-
-yincode = yincode.replace("${CHOICES}", yopt_str)
-
-# Commit the code into .h file
-youtfile = open(c_files[0], "w")
-youtfile.write(yincode)
-yinfile.close()
-youtfile.close()
-
-#
-# Generate the .c file
-#
-
-# Get the template in
-yinfile = open(os.path.join(arg_opts.dir, "yopts.c.in"))
-yincode = yinfile.read()
-yincode = yincode.replace("${PROJ}", yname)
-
-yinsfile = open(os.path.join(arg_opts.dir, "yopt_set.c.in"))
-yinscode = yinsfile.read()
-yinscode = yinscode.replace("${PROJ}", yname)
-
-def cstrval(s):
-	return "\"%s\"" % s.strip("\"")
-
-# Generate default values
-yopt_str = ""
-for yopt in yopts:
-	if not getattr(yopt, "defval", None):
-		continue
-
-	if yopt_str:
-		yopt_str += "\t"
-
-	if yopt.atype in (typ_string, typ_path):
-		yassig = cstrval(yopt.defval)
-	elif yopt.atype == typ_integer:
-		yassig = "%s" % yopt.defval
-
-	yopt_str += ".%s = %s,\n" % (opt_cname(yopt), yassig)
-
-yincode = yincode.replace("${DEFAULTS}", yopt_str)
-
-#
-# Generate option sets
-#
-
-def gen_opt_set(name, yopts, ng_yopts):
-	yscode = yinscode.replace("${YSET}", name)
-
-	# Generate and put short options array
+def generate_cparser():
+	##
+	#	
+	# Generate sources
+	#
+	##
+	
+	if arg_opts.output:
+		c_files = arg_opts.output.split(":")
+	else:
+		c_files = [ "%s_yopts.h" % yname, "%s_yopts.c" % yname ]
+	
+	ctypes = {
+		typ_boolean:	"bool",
+		typ_integer:	"int",
+		typ_string:	"char *",
+		typ_path:	"char *",
+	}
+	
+	#
+	# Generate the .h file
+	#
+	
+	yinfile = open(os.path.join(arg_opts.dir, "yopts.h.in"))
+	yincode = yinfile.read()
+	yincode = yincode.replace("${PROJ}", yname)
+	
+	# Generate the yopts structure
+	yopt_str = ""
+	def opt_vdecl(vtyp, vname, ptr = False):
+		return "%s%s %s;\n\t" % (ctypes[vtyp], ptr and "*" or "", vname)
+	
+	for yopt in yopts:
+		if yopt.pile:
+			yopt_str += opt_vdecl(typ_integer, opt_cname(yopt) + "_nr")
+		# For non ints with choice generate numerical constants
+		# for faster comparisons in the code
+		if len(yopt.choice) and (yopt.atype != typ_integer):
+			yopt_str += opt_vdecl(typ_integer, opt_cname(yopt) + "_code")
+	
+		yopt_str += opt_vdecl(yopt.atype, opt_cname(yopt), yopt.pile)
+	
+	yincode = yincode.replace("${STRUCTURE}", yopt_str)
+	
+	# Generate constants for choice-d options and arguments
+	yopt_str = ""
+	enum_decl_str = "\
+	enum {\n\
+	%s\
+	};\n\n"
+	
+	for yopt in yopts:
+		if not len(yopt.choice):
+			continue
+	
+		for ch in yopt.choice:
+			ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
+	
+		vals = map(lambda x: "\t%s,\n" % x.ccode, yopt.choice)
+		yopt_str += enum_decl_str % "".join(vals)
+	
+	yincode = yincode.replace("${CHOICES}", yopt_str)
+	
+	# Commit the code into .h file
+	youtfile = open(c_files[0], "w")
+	youtfile.write(yincode)
+	yinfile.close()
+	youtfile.close()
+	
+	#
+	# Generate the .c file
+	#
+	
+	# Get the template in
+	yinfile = open(os.path.join(arg_opts.dir, "yopts.c.in"))
+	yincode = yinfile.read()
+	yincode = yincode.replace("${PROJ}", yname)
+	
+	yinsfile = open(os.path.join(arg_opts.dir, "yopt_set.c.in"))
+	yinscode = yinsfile.read()
+	yinscode = yinscode.replace("${PROJ}", yname)
+	
+	def cstrval(s):
+		return "\"%s\"" % s.strip("\"")
+	
+	# Generate default values
 	yopt_str = ""
 	for yopt in yopts:
-		if not getattr(yopt, "sname", None):
+		if not getattr(yopt, "defval", None):
 			continue
-		if ng_yopts and getattr(yopt, "genonly", None):
-			continue
-
-		yopt_str += yopt.sname
-		if yopt.atype != typ_boolean:
-			if getattr(yopt, "optarg", None):
-				yopt_str += "::"
+	
+		if yopt_str:
+			yopt_str += "\t"
+	
+		if yopt.atype in (typ_string, typ_path):
+			yassig = cstrval(yopt.defval)
+		elif yopt.atype == typ_integer:
+			yassig = "%s" % yopt.defval
+	
+		yopt_str += ".%s = %s,\n" % (opt_cname(yopt), yassig)
+	
+	yincode = yincode.replace("${DEFAULTS}", yopt_str)
+	
+	#
+	# Generate option sets
+	#
+	
+	def gen_opt_set(name, yopts, ng_yopts):
+		yscode = yinscode.replace("${YSET}", name)
+	
+		# Generate and put short options array
+		yopt_str = ""
+		for yopt in yopts:
+			if not getattr(yopt, "sname", None):
+				continue
+			if ng_yopts and getattr(yopt, "genonly", None):
+				continue
+	
+			yopt_str += yopt.sname
+			if yopt.atype != typ_boolean:
+				if getattr(yopt, "optarg", None):
+					yopt_str += "::"
+				else:
+					yopt_str += ":"
+	
+		yscode = yscode.replace("${SOPTS}", yopt_str)
+	
+		# Generate and put long options array
+	
+		def opt_cassign(yopt):
+			if getattr(yopt, "sname", None):
+				return "'%s'" % yopt.sname
 			else:
-				yopt_str += ":"
-
-	yscode = yscode.replace("${SOPTS}", yopt_str)
-
-	# Generate and put long options array
-
-	def opt_cassign(yopt):
-		if getattr(yopt, "sname", None):
-			return "'%s'" % yopt.sname
+				return "%d" % yopt.sname_nr
+	
+		yopt_str = ""
+		for yopt in yopts:
+			if yopt.otype != opt_option:
+				continue
+			if not getattr(yopt, "lname", None):
+				continue
+			if ng_yopts and getattr(yopt, "genonly", None):
+				continue
+	
+			if yopt.atype == typ_boolean:
+				yopt_rarg = "no_argument"
+			elif getattr(yopt, "optarg", None):
+				yopt_rarg = "optional_argument"
+			else:
+				yopt_rarg = "required_argument"
+	
+			yopt_sopt = opt_cassign(yopt)
+			lnames = getattr(yopt, "laliases", [])
+			lnames.insert(0, yopt.lname)
+	
+			for lname in lnames:
+				if yopt_str:
+					yopt_str += "\n\t"
+	
+				yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
+	
+		yscode = yscode.replace("${LOPTS}", yopt_str)
+	
+		# Generate options assignment
+		def optarg_assign(yopt):
+			if yopt.atype in (typ_string, typ_path):
+				return cstrval(yopt.optarg)
+			elif yopt.optarg.startswith("+"):
+				return "%s %s" % (opt_sname(yopt), yopt.optarg)
+			else:
+				return yopt.optarg
+	
+		def opt_assign_code(yopt, value):
+			yopt_str = ""
+			yopt_vassign = opt_sname(yopt)
+			if yopt.pile:
+				yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
+	
+			if yopt.atype == typ_boolean:
+				yopt_assign = "true"
+			elif yopt.atype in (typ_string, typ_path):
+				yopt_assign = value
+			elif yopt.atype == typ_integer:
+				yopt_assign = "yopt_parse_int(%s)" % value
+	
+			if (value != "optarg") and getattr(yopt, "optarg", None):
+				yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
+	
+			yopt_str += "\t\tdprint(\"%s assigned to %%s\\n\", %s);\n" % (opt_sname(yopt), value)
+			if yopt.pile:
+				yopt_str += "\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
+					     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
+				yopt_str += "\t\tif (%s)\n\t" % opt_sname(yopt)
+			yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
+			return yopt_str
+	
+		if not ng_yopts:
+			yscode = yscode.replace("${GENERIC}", "true")
+			ng_yopts = yopts
 		else:
-			return "%d" % yopt.sname_nr
-
-	yopt_str = ""
-	for yopt in yopts:
-		if yopt.otype != opt_option:
-			continue
-		if not getattr(yopt, "lname", None):
-			continue
-		if ng_yopts and getattr(yopt, "genonly", None):
-			continue
-
-		if yopt.atype == typ_boolean:
-			yopt_rarg = "no_argument"
-		elif getattr(yopt, "optarg", None):
-			yopt_rarg = "optional_argument"
-		else:
-			yopt_rarg = "required_argument"
-
-		yopt_sopt = opt_cassign(yopt)
-		lnames = getattr(yopt, "laliases", [])
-		lnames.insert(0, yopt.lname)
-
-		for lname in lnames:
+			yscode = yscode.replace("${GENERIC}", "false")
+	
+		yopt_str = ""
+		for yopt in ng_yopts:
+			if yopt.otype != opt_option:
+				continue
+	
 			if yopt_str:
 				yopt_str += "\n\t"
-
-			yopt_str += "{\"%s\", %s, 0, %s}," % (lname, yopt_rarg, yopt_sopt)
-
-	yscode = yscode.replace("${LOPTS}", yopt_str)
-
-	# Generate options assignment
-	def optarg_assign(yopt):
-		if yopt.atype in (typ_string, typ_path):
-			return cstrval(yopt.optarg)
-		elif yopt.optarg.startswith("+"):
-			return "%s %s" % (opt_sname(yopt), yopt.optarg)
-		else:
-			return yopt.optarg
-
-	def opt_assign_code(yopt, value):
-		yopt_str = ""
-		yopt_vassign = opt_sname(yopt)
-		if yopt.pile:
-			yopt_vassign = "%s[%s_nr++]" % (opt_sname(yopt), opt_sname(yopt))
-
-		if yopt.atype == typ_boolean:
-			yopt_assign = "true"
-		elif yopt.atype in (typ_string, typ_path):
-			yopt_assign = value
-		elif yopt.atype == typ_integer:
-			yopt_assign = "yopt_parse_int(%s)" % value
-
-		if (value != "optarg") and getattr(yopt, "optarg", None):
-			yopt_assign = "(optarg ? %s : %s)" % (yopt_assign, optarg_assign(yopt))
-
-		yopt_str += "\t\tdprint(\"%s assigned to %%s\\n\", %s);\n" % (opt_sname(yopt), value)
-		if yopt.pile:
-			yopt_str += "\t\t%s = yopt_realloc_mem(%s, (%s_nr + 1) * sizeof(%s));\n" % \
-				     (opt_sname(yopt), opt_sname(yopt), opt_sname(yopt), ctypes[yopt.atype])
-			yopt_str += "\t\tif (%s)\n\t" % opt_sname(yopt)
-		yopt_str += "\t\t%s = %s;\n" % (yopt_vassign, yopt_assign)
-		return yopt_str
-
-	if not ng_yopts:
-		yscode = yscode.replace("${GENERIC}", "true")
-		ng_yopts = yopts
-	else:
-		yscode = yscode.replace("${GENERIC}", "false")
-
-	yopt_str = ""
-	for yopt in ng_yopts:
-		if yopt.otype != opt_option:
-			continue
-
-		if yopt_str:
-			yopt_str += "\n\t"
-
-		yopt_str += "case %s:\n" % opt_cassign(yopt)
-		yopt_str += opt_assign_code(yopt, "optarg")
-		for impl in yopt.imply:
-			imps = impl.partition("=")
-			iyopt = yopt_find_l(imps[0].strip(), yopts)
-			if not iyopt:
-				print "No target option for %s implication" % impl
-				sys.exit(1)
-
-			if iyopt.atype == typ_boolean:
-				if imps[2]:
-					print "No value for boolean imply"
+	
+			yopt_str += "case %s:\n" % opt_cassign(yopt)
+			yopt_str += opt_assign_code(yopt, "optarg")
+			for impl in yopt.imply:
+				imps = impl.partition("=")
+				iyopt = yopt_find_l(imps[0].strip(), yopts)
+				if not iyopt:
+					print "No target option for %s implication" % impl
 					sys.exit(1)
-				iassign = "NULL"
-			else:
-				iassign = cstrval(imps[2].strip())
-
-			yopt_str += opt_assign_code(iyopt, iassign)
-
-		yopt_str += "\t\tbreak;"
-
-	return yscode.replace("${OPTS_ASSIGN}", yopt_str);
-
-#yinscode = gen_opt_set("generic", yopts)
-
-def gen_opt_set_grp(ygrp):
-	if ygrp.name == "generic":
-		return gen_opt_set("generic", ygrp.yopts, None)
-
-	yopts = []
-	yopts.extend(ygrp.yopts)
-	yopts.extend(yopt_groups["generic"].yopts)
-
-	return gen_opt_set(ygrp.name, yopts, ygrp.yopts)
-
-yinsscode = ""
-for gname in yopt_groups:
-	ygrp = yopt_groups[gname]
-	yinsscode += "/*\n * Set for %s\n */\n" % ygrp.name
-	yinsscode += gen_opt_set_grp(ygrp)
-	yinsscode += "/* End of %s set */\n" % ygrp.name
-
-#
-# End generating sets -- put them into main .c file
-#
-
-yincode = yincode.replace("${YSETS}", yinsscode)
-
-# Generate validation routine (choices)
-yopt_str = ""
-
-def c_indent(istr, code):
-	return istr + istr.join(code.splitlines(True))
-
-def gen_choice_fixup(yopt):
+	
+				if iyopt.atype == typ_boolean:
+					if imps[2]:
+						print "No value for boolean imply"
+						sys.exit(1)
+					iassign = "NULL"
+				else:
+					iassign = cstrval(imps[2].strip())
+	
+				yopt_str += opt_assign_code(iyopt, iassign)
+	
+			yopt_str += "\t\tbreak;"
+	
+		return yscode.replace("${OPTS_ASSIGN}", yopt_str);
+	
+	#yinscode = gen_opt_set("generic", yopts)
+	
+	def gen_opt_set_grp(ygrp):
+		if ygrp.name == "generic":
+			return gen_opt_set("generic", ygrp.yopts, None)
+	
+		yopts = []
+		yopts.extend(ygrp.yopts)
+		yopts.extend(yopt_groups["generic"].yopts)
+	
+		return gen_opt_set(ygrp.name, yopts, ygrp.yopts)
+	
+	yinsscode = ""
+	for gname in yopt_groups:
+		ygrp = yopt_groups[gname]
+		yinsscode += "/*\n * Set for %s\n */\n" % ygrp.name
+		yinsscode += gen_opt_set_grp(ygrp)
+		yinsscode += "/* End of %s set */\n" % ygrp.name
+	
+	#
+	# End generating sets -- put them into main .c file
+	#
+	
+	yincode = yincode.replace("${YSETS}", yinsscode)
+	
+	# Generate validation routine (choices)
 	yopt_str = ""
-	if yopt.atype == typ_string:
-		if yopt.otype == opt_option:
-			yopt_str += "if (!%s) {\n" % opt_sname(yopt)
-			yopt_str += "\t;\n"
-			yopt_str += "} else "
-
-		for ch in yopt.choice:
-			vals = getattr(ch, "aliases", None) or []
-			vals.insert(0, ch.val)
-			cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x), vals)
-			cmps = " || ".join(cmps)
-			yopt_str += "if (%s) {\n" % cmps
-			yopt_str += "\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
-			if getattr(ch, "schoice", None):
-				yopt_str += "\treturn -1;\n"
-			elif yopt == active_classifier:
-				ykey = "%s = %s" % (yopt.lname, ch.val)
-				if yopt_groups.has_key(ykey):
-					yopt_str += "\tycur = &%s_set;\n" % yopt_groups[ykey].name
-					yopt_str += "\tnew_set = true;\n"
-			yopt_str += "} else "
-
-		yopt_str += " {\n"
-		yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
-		yopt_str += "}\n\n"
-
-	elif yopt.atype == typ_integer:
-		yopt_str += "switch (%s) {\n" % opt_sname(yopt)
-		cases = map(lambda x: "case %s:\n" % x.val, yopt.choice)
-		yopt_str += "".join(cases)
-		yopt_str += "\tbreak;\n"
-		yopt_str += "default:\n"
-		if (yopt.otype == opt_option):
-			yopt_str += "\tif (!%s)\n" % opt_sname(yopt)
-			yopt_str += "\t\tbreak;\n"
-		yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
-		yopt_str += "}\n\n"
-
-	return yopt_str
-
-
-for yopt in yopts:
-	if yopt.otype == opt_argument:
-		continue
-	if not len(yopt.choice):
-		continue
-
-	yopt_str += gen_choice_fixup(yopt)
-
-yopt_str = c_indent("\t", yopt_str)
-yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
-
-# Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
-yopt_str = ""
-args_nr = 0
-for yopt in yopts:
-	if yopt.otype != opt_argument:
-		continue
-
-	if yopt.atype in (typ_string, typ_path):
-		arg_assign = "arg"
-	elif yopt.atype == typ_integer:
-		arg_assign = "yopt_parse_int(arg)"
-	else:
-		print "Wrong type for an argument\n"
-		sys.exit(1)
-
-	yopt_str += "case %d:\n" % args_nr
-	yopt_str += "\tdprint(\"%s assigned to %%s\\n\", arg);\n" % opt_sname(yopt)
-	yopt_str += "\t%s = %s;\n" % (opt_sname(yopt), arg_assign)
-
-	if len(yopt.choice):
-		yopt_str += c_indent("\t", gen_choice_fixup(yopt))
-
-	yopt_str += "\tbreak;\n"
-
-	args_nr += 1
-
-yopt_str = c_indent("\t", yopt_str)
-yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)
-yincode = yincode.replace("${NR_ARGS}", "%d" % args_nr)
-
-yopt_str = ""
-arg_nr = 0
-for yopt in yopts:
-	if yopt.otype != opt_argument:
-		continue
-
-	yopt_str += "if (yopt_next_arg <= %d) {\n" % arg_nr
-	yopt_str += "\tyopt_print(\"Argument %s missing\\n\");\n" % opt_pname(yopt)
-	yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
-	yopt_str += "}\n\n"
-
-	arg_nr += 1
-
-yopt_str = c_indent("\t", yopt_str)
-yincode = yincode.replace("${CHECK_ARGS}", yopt_str)
-
-# Expressions generator
-
-def yoda_gen_one_cexp(exp):
-	parts = exp.partition("=")
+	
+	def c_indent(istr, code):
+		return istr + istr.join(code.splitlines(True))
+	
+	def gen_choice_fixup(yopt):
+		yopt_str = ""
+		if yopt.atype == typ_string:
+			if yopt.otype == opt_option:
+				yopt_str += "if (!%s) {\n" % opt_sname(yopt)
+				yopt_str += "\t;\n"
+				yopt_str += "} else "
+	
+			for ch in yopt.choice:
+				vals = getattr(ch, "aliases", None) or []
+				vals.insert(0, ch.val)
+				cmps = map(lambda x: "!strcmp(%s, \"%s\")" % (opt_sname(yopt), x), vals)
+				cmps = " || ".join(cmps)
+				yopt_str += "if (%s) {\n" % cmps
+				yopt_str += "\t%s_code = %s;\n" % (opt_sname(yopt), ch.ccode)
+				if getattr(ch, "schoice", None):
+					yopt_str += "\treturn -1;\n"
+				elif yopt == active_classifier:
+					ykey = "%s = %s" % (yopt.lname, ch.val)
+					if yopt_groups.has_key(ykey):
+						yopt_str += "\tycur = &%s_set;\n" % yopt_groups[ykey].name
+						yopt_str += "\tnew_set = true;\n"
+				yopt_str += "} else "
+	
+			yopt_str += " {\n"
+			yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
+			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+			yopt_str += "}\n\n"
+	
+		elif yopt.atype == typ_integer:
+			yopt_str += "switch (%s) {\n" % opt_sname(yopt)
+			cases = map(lambda x: "case %s:\n" % x.val, yopt.choice)
+			yopt_str += "".join(cases)
+			yopt_str += "\tbreak;\n"
+			yopt_str += "default:\n"
+			if (yopt.otype == opt_option):
+				yopt_str += "\tif (!%s)\n" % opt_sname(yopt)
+				yopt_str += "\t\tbreak;\n"
+			yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
+			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+			yopt_str += "}\n\n"
+	
+		return yopt_str
+	
+	
 	for yopt in yopts:
-		if yopt.lname == parts[0].strip():
-			break;
-
-	if yopt.atype == typ_boolean:
-		fixup = ""
-		comp = ""
-		cval = ""
-	elif (yopt.atype in (typ_string, typ_path)) and len(yopt.choice):
-		fixup = "_code"
-		comp = " == "
-		for ch in yopt.choice:
-			if ch.val == parts[2].strip():
-				cval = ch.ccode
-				break
-		else:
-			sys.exit(1)
-	elif yopt.atype == typ_integer:
-		fixup = ""
-		if parts[1]:
-			comp = " == "
-			cval = parts[2]
-		else:
-			comp = " != "
-			cval = "0"
-	else:
-		print "No req check for %s\n" % opt_sname(yopt)
-		sys.exit(1)
-
-	return "%s%s%s%s" % (opt_sname(yopt), fixup, comp, cval)
-
-def yoda_gen_cexpression(exp_str):
-	exps = exp_str.partition("|")
-	ret_str = yoda_gen_one_cexp(exps[0])
-	if exps[1]:
-		return ("(%s) || " % ret_str) + yoda_gen_cexpression(exps[2])
-	else:
-		return "(%s)" % ret_str
-
-def yoda_get_group_desc(exp_str):
-	gacts = {}
-	exps = exp_str.split("|")
-	for exp in exps:
-		parts = map(lambda a: a.strip(), exp.split("="))
-
-		if len(parts) == 1:
-			parts = ['option', parts[0]]
-
-		if not gacts.has_key(parts[0]):
-			gacts[parts[0]] = []
-		gacts[parts[0]].append(parts[1])
-
-	gstr = ""
-	for t in gacts:
-		if gstr:
-			gstr += " or "
-		gstr += "for "
-		gstr += " or ".join(gacts[t])
-		gstr += " %s" % t
-		if len(gacts[t]) > 1:
-			gstr += "s"
-
-	return gstr.capitalize()
-
-
-# Generate requirements checks (req_for-s and clash-es)
-
-yopt_str = ""
-for yopt in yopts:
-	if getattr(yopt, "required_for", None):
-		yopt_str += "if (%s) {\n" % yoda_gen_cexpression(yopt.required_for)
-		yopt_str += "\tif (!%s) {\n" % opt_sname(yopt)
-		yopt_str += "\t\tyopt_err = YOPTS_PARSE_ERR;\n"
-		yopt_str += "\t\tyopt_print(\"Option %s required\\n\");\n" % opt_pname(yopt)
-		yopt_str += "\t}\n"
-		yopt_str += "}\n\n"
-
-	if getattr(yopt, "conflicts", None):
-		yopt_str += "if (%s && (%s)) {\n" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
-		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
-		yopt_str += "\tyopt_print(\"Option %s conflict\\n\");\n" % opt_pname(yopt)
-		yopt_str += "}\n\n"
-
-yopt_str = c_indent("\t", yopt_str)
-yincode = yincode.replace("${CHECK_REQS}", yopt_str)
-
-# Generate usage text
-yopt_str = ""
-yopt_align = "\t       "
-yopt_indent = "     "
-yopt_el = yopt_align + "\"\\n\"\n"
-
-yopt_str += yopt_align + "\"" + yopt_indent + yname
-for yopt in yopts:
-	if yopt.otype != opt_argument:
-		continue
-	if opt_deprecated(yopt):
-		continue
-
-	yopt_str += " <%s>" % yopt.lname
-
-yopt_str += " [<options>]\\n\"\n"
-yopt_str += yopt_el
-
-# "Arguments" block
-for yopt in yopts:
-	if (yopt.otype != opt_argument):
-		continue
-	if opt_deprecated(yopt):
-		continue
-
-	yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
-	if len(yopt.choice) > 0:
-		for ch in yopt.choice:
-			yopt_str += yopt_align + "\"" + yopt_indent + \
-				    ch.val.ljust(10 + yopt_name_len_max) + \
-				    ch.summary + "\\n\"\n"
-	yopt_str += yopt_el
-
-# "Options" block
-def yopt_argname(yopt, dflt):
-	# Remove all but UPPERCASE letters
-	s = filter(lambda x: x.isupper(), yopt.summary)
-	if getattr(yopt, "optarg", None):
-		s = "[%s]" % s
-	return len(s) and s or dflt
-
-yopt_str += yopt_align + "\"Options:\\n\"\n"
-
-yopts_groups = {}
-yopts_default = []
-yopts_generic = []
-
-# Classify options
-for yopt in yopts:
-	if yopt.otype != opt_option:
-		continue
-	if opt_deprecated(yopt):
-		continue
-
-	for_expr = []
-
-	if getattr(yopt, "hgroup", None):
-		for_expr.append(yopt.hgroup)
-	else:
-		if getattr(yopt, "required_for", None):
-			for_expr.append(yopt.required_for)
-		if getattr(yopt, "optional_for", None):
-			for_expr.append(yopt.optional_for)
-
-	if not for_expr:
-		yopts_generic.append(yopt)
-		continue
-
-	for_expr = " | ".join(for_expr)
-
-	if yopts_groups.has_key(for_expr):
-		yopts_groups[for_expr].append(yopt)
-	else:
-		yopts_groups[for_expr] = [yopt]
-
-# convert dict to list and sort it
-yopts_groups = map(lambda k: (k, yopts_groups[k]), yopts_groups)
-yopts_groups.sort(lambda a, b: len(a[1]) < len(b[1]) and 1 or -1)
-
-i = 0
-ygroup_merge_thresh = 3
-while i < len(yopts_groups):
-	yopt = yopts_groups[i];
-	if len(yopt[1]) >= ygroup_merge_thresh:
-		i += 1
-		continue
-	# merge a group, which contains less than three options
-	yopts_groups.remove(yopt)
-	for g in yopts_groups:
-		if set(yopt[0].split(" | ")).issubset(set(g[0].split(" | "))):
-			g[1].extend(yopt[1])
-			break
-	else:
-		yopts_default.extend(yopt[1])
-
-yopts_groups = map(lambda k: (yoda_get_group_desc(k[0]), k[1]), yopts_groups)
-yopts_groups.insert(0, ("Generic", yopts_generic))
-yopts_groups.append(("Other", yopts_default))
-
-for group in yopts_groups:
-	yopt_str += yopt_align + "\"\\n\"\n"
-	yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
-	for yopt in group[1]:
-		if yopt.otype != opt_option:
+		if yopt.otype == opt_argument:
 			continue
-
-		delim = False
-		if getattr(yopt, "sname", None):
-			yopt_sub_str = "-%s" % yopt.sname
-			delim = True
+		if not len(yopt.choice):
+			continue
+	
+		yopt_str += gen_choice_fixup(yopt)
+	
+	yopt_str = c_indent("\t", yopt_str)
+	yincode = yincode.replace("${FIX_CHOICES}", yopt_str)
+	
+	# Generate arguments (arg-s) parsing. The getopt_long puts leaves them at the end of argv array
+	yopt_str = ""
+	args_nr = 0
+	for yopt in yopts:
+		if yopt.otype != opt_argument:
+			continue
+	
+		if yopt.atype in (typ_string, typ_path):
+			arg_assign = "arg"
+		elif yopt.atype == typ_integer:
+			arg_assign = "yopt_parse_int(arg)"
 		else:
-			yopt_sub_str = "  "
-		if getattr(yopt, "lname", None):
-			yopt_sub_str += (delim and ", " or "  ")
-			yopt_sub_str += "--%s" % yopt.lname
-
-		if yopt.atype == typ_integer:
-			yopt_sub_str += " " + yopt_argname(yopt, "NUM")
-		elif yopt.atype == typ_string:
-			yopt_sub_str += " " + yopt_argname(yopt, "STR")
-		elif yopt.atype == typ_path:
-			yopt_sub_str += " " + yopt_argname(yopt, "PATH")
-
-		yopt_str += yopt_align + "\"" + yopt_indent + \
-			    yopt_sub_str.ljust(12 + yopt_name_len_max) + \
-			    yopt.summary.lower() + "\\n\"" + "\n"
-
+			print "Wrong type for an argument\n"
+			sys.exit(1)
+	
+		yopt_str += "case %d:\n" % args_nr
+		yopt_str += "\tdprint(\"%s assigned to %%s\\n\", arg);\n" % opt_sname(yopt)
+		yopt_str += "\t%s = %s;\n" % (opt_sname(yopt), arg_assign)
+	
+		if len(yopt.choice):
+			yopt_str += c_indent("\t", gen_choice_fixup(yopt))
+	
+		yopt_str += "\tbreak;\n"
+	
+		args_nr += 1
+	
+	yopt_str = c_indent("\t", yopt_str)
+	yincode = yincode.replace("${ASSIGN_ARGS}", yopt_str)
+	yincode = yincode.replace("${NR_ARGS}", "%d" % args_nr)
+	
+	yopt_str = ""
+	arg_nr = 0
+	for yopt in yopts:
+		if yopt.otype != opt_argument:
+			continue
+	
+		yopt_str += "if (yopt_next_arg <= %d) {\n" % arg_nr
+		yopt_str += "\tyopt_print(\"Argument %s missing\\n\");\n" % opt_pname(yopt)
+		yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+		yopt_str += "}\n\n"
+	
+		arg_nr += 1
+	
+	yopt_str = c_indent("\t", yopt_str)
+	yincode = yincode.replace("${CHECK_ARGS}", yopt_str)
+	
+	# Expressions generator
+	
+	def yoda_gen_one_cexp(exp):
+		parts = exp.partition("=")
+		for yopt in yopts:
+			if yopt.lname == parts[0].strip():
+				break;
+	
+		if yopt.atype == typ_boolean:
+			fixup = ""
+			comp = ""
+			cval = ""
+		elif (yopt.atype in (typ_string, typ_path)) and len(yopt.choice):
+			fixup = "_code"
+			comp = " == "
+			for ch in yopt.choice:
+				if ch.val == parts[2].strip():
+					cval = ch.ccode
+					break
+			else:
+				sys.exit(1)
+		elif yopt.atype == typ_integer:
+			fixup = ""
+			if parts[1]:
+				comp = " == "
+				cval = parts[2]
+			else:
+				comp = " != "
+				cval = "0"
+		else:
+			print "No req check for %s\n" % opt_sname(yopt)
+			sys.exit(1)
+	
+		return "%s%s%s%s" % (opt_sname(yopt), fixup, comp, cval)
+	
+	def yoda_gen_cexpression(exp_str):
+		exps = exp_str.partition("|")
+		ret_str = yoda_gen_one_cexp(exps[0])
+		if exps[1]:
+			return ("(%s) || " % ret_str) + yoda_gen_cexpression(exps[2])
+		else:
+			return "(%s)" % ret_str
+	
+	def yoda_get_group_desc(exp_str):
+		gacts = {}
+		exps = exp_str.split("|")
+		for exp in exps:
+			parts = map(lambda a: a.strip(), exp.split("="))
+	
+			if len(parts) == 1:
+				parts = ['option', parts[0]]
+	
+			if not gacts.has_key(parts[0]):
+				gacts[parts[0]] = []
+			gacts[parts[0]].append(parts[1])
+	
+		gstr = ""
+		for t in gacts:
+			if gstr:
+				gstr += " or "
+			gstr += "for "
+			gstr += " or ".join(gacts[t])
+			gstr += " %s" % t
+			if len(gacts[t]) > 1:
+				gstr += "s"
+	
+		return gstr.capitalize()
+	
+	
+	# Generate requirements checks (req_for-s and clash-es)
+	
+	yopt_str = ""
+	for yopt in yopts:
+		if getattr(yopt, "required_for", None):
+			yopt_str += "if (%s) {\n" % yoda_gen_cexpression(yopt.required_for)
+			yopt_str += "\tif (!%s) {\n" % opt_sname(yopt)
+			yopt_str += "\t\tyopt_err = YOPTS_PARSE_ERR;\n"
+			yopt_str += "\t\tyopt_print(\"Option %s required\\n\");\n" % opt_pname(yopt)
+			yopt_str += "\t}\n"
+			yopt_str += "}\n\n"
+	
+		if getattr(yopt, "conflicts", None):
+			yopt_str += "if (%s && (%s)) {\n" % (opt_sname(yopt), yoda_gen_cexpression(yopt.conflicts))
+			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
+			yopt_str += "\tyopt_print(\"Option %s conflict\\n\");\n" % opt_pname(yopt)
+			yopt_str += "}\n\n"
+	
+	yopt_str = c_indent("\t", yopt_str)
+	yincode = yincode.replace("${CHECK_REQS}", yopt_str)
+	
+	# Generate usage text
+	yopt_str = ""
+	yopt_align = "\t       "
+	yopt_indent = "     "
+	yopt_el = yopt_align + "\"\\n\"\n"
+	
+	yopt_str += yopt_align + "\"" + yopt_indent + yname
+	for yopt in yopts:
+		if yopt.otype != opt_argument:
+			continue
+		if opt_deprecated(yopt):
+			continue
+	
+		yopt_str += " <%s>" % yopt.lname
+	
+	yopt_str += " [<options>]\\n\"\n"
+	yopt_str += yopt_el
+	
+	# "Arguments" block
+	for yopt in yopts:
+		if (yopt.otype != opt_argument):
+			continue
+		if opt_deprecated(yopt):
+			continue
+	
+		yopt_str += yopt_align + "\"%s: %s\\n\"\n" % (yopt.lname.capitalize(), yopt.summary)
 		if len(yopt.choice) > 0:
 			for ch in yopt.choice:
-				if len(ch.summary):
-					yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
-				else:
-					yopt_sub_str = "%s" % ch.val
 				yopt_str += yopt_align + "\"" + yopt_indent + \
-					    "".ljust(12 + yopt_name_len_max) + \
-					    yopt_indent + yopt_sub_str + "\\n\"\n"
+					    ch.val.ljust(10 + yopt_name_len_max) + \
+					    ch.summary + "\\n\"\n"
+		yopt_str += yopt_el
+	
+	# "Options" block
+	def yopt_argname(yopt, dflt):
+		# Remove all but UPPERCASE letters
+		s = filter(lambda x: x.isupper(), yopt.summary)
+		if getattr(yopt, "optarg", None):
+			s = "[%s]" % s
+		return len(s) and s or dflt
+	
+	yopt_str += yopt_align + "\"Options:\\n\"\n"
+	
+	yopts_groups = {}
+	yopts_default = []
+	yopts_generic = []
+	
+	# Classify options
+	for yopt in yopts:
+		if yopt.otype != opt_option:
+			continue
+		if opt_deprecated(yopt):
+			continue
+	
+		for_expr = []
+	
+		if getattr(yopt, "hgroup", None):
+			for_expr.append(yopt.hgroup)
+		else:
+			if getattr(yopt, "required_for", None):
+				for_expr.append(yopt.required_for)
+			if getattr(yopt, "optional_for", None):
+				for_expr.append(yopt.optional_for)
+	
+		if not for_expr:
+			yopts_generic.append(yopt)
+			continue
+	
+		for_expr = " | ".join(for_expr)
+	
+		if yopts_groups.has_key(for_expr):
+			yopts_groups[for_expr].append(yopt)
+		else:
+			yopts_groups[for_expr] = [yopt]
+	
+	# convert dict to list and sort it
+	yopts_groups = map(lambda k: (k, yopts_groups[k]), yopts_groups)
+	yopts_groups.sort(lambda a, b: len(a[1]) < len(b[1]) and 1 or -1)
+	
+	i = 0
+	ygroup_merge_thresh = 3
+	while i < len(yopts_groups):
+		yopt = yopts_groups[i];
+		if len(yopt[1]) >= ygroup_merge_thresh:
+			i += 1
+			continue
+		# merge a group, which contains less than three options
+		yopts_groups.remove(yopt)
+		for g in yopts_groups:
+			if set(yopt[0].split(" | ")).issubset(set(g[0].split(" | "))):
+				g[1].extend(yopt[1])
+				break
+		else:
+			yopts_default.extend(yopt[1])
+	
+	yopts_groups = map(lambda k: (yoda_get_group_desc(k[0]), k[1]), yopts_groups)
+	yopts_groups.insert(0, ("Generic", yopts_generic))
+	yopts_groups.append(("Other", yopts_default))
+	
+	for group in yopts_groups:
+		yopt_str += yopt_align + "\"\\n\"\n"
+		yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
+		for yopt in group[1]:
+			if yopt.otype != opt_option:
+				continue
+	
+			delim = False
+			if getattr(yopt, "sname", None):
+				yopt_sub_str = "-%s" % yopt.sname
+				delim = True
+			else:
+				yopt_sub_str = "  "
+			if getattr(yopt, "lname", None):
+				yopt_sub_str += (delim and ", " or "  ")
+				yopt_sub_str += "--%s" % yopt.lname
+	
+			if yopt.atype == typ_integer:
+				yopt_sub_str += " " + yopt_argname(yopt, "NUM")
+			elif yopt.atype == typ_string:
+				yopt_sub_str += " " + yopt_argname(yopt, "STR")
+			elif yopt.atype == typ_path:
+				yopt_sub_str += " " + yopt_argname(yopt, "PATH")
+	
+			yopt_str += yopt_align + "\"" + yopt_indent + \
+				    yopt_sub_str.ljust(12 + yopt_name_len_max) + \
+				    yopt.summary.lower() + "\\n\"" + "\n"
+	
+			if len(yopt.choice) > 0:
+				for ch in yopt.choice:
+					if len(ch.summary):
+						yopt_sub_str = "%s - %s" % (ch.val, ch.summary)
+					else:
+						yopt_sub_str = "%s" % ch.val
+					yopt_str += yopt_align + "\"" + yopt_indent + \
+						    "".ljust(12 + yopt_name_len_max) + \
+						    yopt_indent + yopt_sub_str + "\\n\"\n"
+	
+	yincode = yincode.replace("${USAGE}", yopt_str)
+	
+	# Commit the code into .c file
+	youtfile = open(c_files[1], "w")
+	youtfile.write(yincode)
+	
+	yinsfile.close()
+	yinfile.close()
+	youtfile.close()
 
-yincode = yincode.replace("${USAGE}", yopt_str)
+# End of cparser generator (generate_cparser)
 
-# Commit the code into .c file
-youtfile = open(c_files[1], "w")
-youtfile.write(yincode)
-
-yinsfile.close()
-yinfile.close()
-youtfile.close()
+if arg_opts.generate == "cparser":
+	generate_cparser()
