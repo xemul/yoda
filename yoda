@@ -1087,8 +1087,12 @@ def generate_bashcomp():
 	yopt = active_classifier
 	if yopt and len(yopt.choice):
 		for ch in yopt.choice:
-			ygrp=yopt_groups["%s = %s" % (yopt.lname, ch.val)]
-			comp_words=" ".join(map(lambda x: opt_pname(x), ygrp.yopts))
+			ykey = "%s = %s" % (yopt.lname, ch.val)
+			if yopt_groups.has_key(ykey):
+				ygrp=yopt_groups["%s = %s" % (yopt.lname, ch.val)]
+				comp_words=" ".join(map(lambda x: opt_pname(x), ygrp.yopts))
+			else:
+				comp_words=""
 
 			yopt_str += "\"%s\")\n" % ch.val
 			yopt_str += "\tCOMPREPLY=( $(compgen -W \"%s\" -- ${cur}))\n" % (comp_words + " " + gen_comp_words)
