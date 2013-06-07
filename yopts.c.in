@@ -91,7 +91,7 @@ struct yopt_set {
 static int generic_assign(int opt, char **argv);
 static int yopts_parse_arg(char *arg);
 
-static def_assign(int opt, char **argv, bool generic)
+static int def_assign(int opt, char **argv, bool generic)
 {
 	if (generic) {
 		if (opt == 1)
