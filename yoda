@@ -29,7 +29,7 @@ typ_integer = 2
 typ_string = 3
 typ_path = 4
 
-generators = [ "cparser", "bashcomp" ]
+generators = [ "cparser", "bashcomp", "manopts" ]
 
 class yoption:
 	def __init__(self, otype):
@@ -238,6 +238,8 @@ for l in yfile:
 		yopt.optarg = ls[1]
 	elif (ls[0] == "pile"):
 		yopt.pile = True
+	elif (ls[0] == "help"):
+		yopt.helptext = ls[1]
 	elif (ls[0] == "set"):
 		ls = ls[1].split(None, 1)
 		if ls[0] == "for":
@@ -437,6 +439,13 @@ if not arg_opts.generate in generators:
 
 def c_indent(istr, code):
 	return istr + istr.join(code.splitlines(True))
+	
+def yopt_argname(yopt, dflt):
+	# Remove all but UPPERCASE letters
+	s = filter(lambda x: x.isupper(), yopt.summary)
+	if getattr(yopt, "optarg", None):
+		s = "[%s]" % s
+	return len(s) and s or dflt
 	
 
 def generate_cparser():
@@ -925,14 +934,6 @@ def generate_cparser():
 					    ch.summary + "\\n\"\n"
 		yopt_str += yopt_el
 	
-	# "Options" block
-	def yopt_argname(yopt, dflt):
-		# Remove all but UPPERCASE letters
-		s = filter(lambda x: x.isupper(), yopt.summary)
-		if getattr(yopt, "optarg", None):
-			s = "[%s]" % s
-		return len(s) and s or dflt
-	
 	yopt_str += yopt_align + "\"Options:\\n\"\n"
 	
 	yopts_groups = {}
@@ -1134,7 +1135,44 @@ def generate_bashcomp():
 	youtfile.close()
 	pass
 
+def generate_manopts():
+	yopt_str=".TH\n"
+
+	yopt_str += ".SH OPTIONS\n"
+	for yopt in yopts:
+		if yopt.otype != opt_option:
+			continue
+		if opt_deprecated(yopt):
+			continue
+
+		yassign = "%s" % opt_pname(yopt)
+		if yopt.atype == typ_integer:
+			yassign += " " + yopt_argname(yopt, "NUM")
+		elif yopt.atype == typ_string:
+			yassign += " " + yopt_argname(yopt, "STR")
+		elif yopt.atype == typ_path:
+			yassign += " " + yopt_argname(yopt, "PATH")
+
+		yassign = yassign.ljust(7 + yopt_name_len_max)
+
+		yopt_str += ".TP\n"
+		yopt_str += "%s\n%s.\n" % (yassign, yopt.summary.lower().capitalize())
+		if getattr(yopt, "helptext", None):
+			yopt_str += "%s\n" % yopt.helptext
+
+	if arg_opts.output:
+		mpage = arg_opts.output
+	else:
+		mpage = "%s.man" % yname
+
+	youtfile = open(mpage, "w")
+	youtfile.write(yopt_str)
+	youtfile.close()
+
+
 if arg_opts.generate == "cparser":
 	generate_cparser()
 elif arg_opts.generate == "bashcomp":
 	generate_bashcomp()
+elif arg_opts.generate == "manopts":
+	generate_manopts()

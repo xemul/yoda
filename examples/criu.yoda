@@ -11,10 +11,14 @@ arg	action
 option	tree/t
 	int		ID of tree to dump
 	req_for		action = dump | action = pre-dump
+	help		CRIU will dump the whole process\
+			subtree, starting from the given one.
 
 option	pid/p
 	int		PID of tree to show/exec
 	req_for		action = show | action = exec
+	help		For exec -- PID of a task to work on, for show --\
+			PID of a task to show information about.
 
 option	images-dir/D
 	path		directory with images
