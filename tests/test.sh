@@ -27,8 +27,8 @@ yoda_exec 255 ./test_ret start -s
 
 yoda_exec 255 ./test_ret start --yes
 yoda_exec 0   ./test_ret start -y
-yoda_exec 0   ./test_ret start -y 1
-yoda_exec 0   ./test_ret start -y unknown
+yoda_exec 1   ./test_ret start -y 1
+yoda_exec 1   ./test_ret start -y unknown
 
 yoda_exec 0   ./test_ret stop --stop-opt --opt-for-stop-opt
 yoda_exec 255 ./test_ret start --stop-opt --opt-for-stop-opt
