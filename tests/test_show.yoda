@@ -1,0 +1,18 @@
+arg	action
+	string	action to perform
+	choice	start		start something
+	choice	stop		stop something
+	choice	status		status of something
+
+option	opt-int/i
+	int	interger
+
+option	opt-string/s
+	string	string
+
+option	opt-bool/b
+	bool	bool
+
+option	opt-pile
+	string	pile
+	pile

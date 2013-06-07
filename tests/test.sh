@@ -8,6 +8,19 @@ function yoda_exec
 	[ "$?" -eq "$ret" ] || { echo FAIL: "$@"; exit 1; }
 }
 
+function yoda_diff
+{
+	local ret=$1
+	shift
+	local out=$1
+	shift
+	yoda_exec $ret "$@" > $out.test
+	cmp $out $out.test || {
+		diff -up $out $out.test
+		exit 1
+	}
+}
+
 yoda_exec 255 ./test_ret
 yoda_exec 255 ./test_ret something
 yoda_exec 0   ./test_ret start
@@ -40,5 +53,8 @@ yoda_exec 0   ./test_ret status --for-status-or-test-req-opt
 yoda_exec 0   ./test_ret status --for-status-or-test-req-opt --test-req
 yoda_exec 255 ./test_ret start  --test-req
 yoda_exec 255 ./test_ret status
+
+yoda_diff 0	test_show.1	./test_show start -s test-string -b -i 456 --opt-pile "strint 1" --opt-pile "string 2"
+yoda_diff 0	test_show.2	./test_show stop
 
 echo PASS
