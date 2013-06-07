@@ -58,7 +58,6 @@ yopt_groups["generic"] = ygroup("generic")
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse", type=str)
 arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
-arg_parser.add_argument("-d", "--dir", default=os.path.dirname(sys.argv[0]), help="templates directory", type=str)
 arg_parser.add_argument("-g", "--generate", required=False, help="what to generate (%s)" % ", ".join(generators), type=str)
 arg_parser.add_argument("-o", "--output", required=False, help="output file(s), separated with :", type=str)
 arg_opts = arg_parser.parse_args()
@@ -67,6 +66,7 @@ if arg_opts.file == None or arg_opts.name == None:
 	arg_parser.print_help()
 	sys.exit(1)
 
+ytmpl_dir = os.path.dirname(sys.argv[0])
 yname = arg_opts.name;
 	
 # Read yoda file in
@@ -462,7 +462,7 @@ def generate_cparser():
 	# Generate the .h file
 	#
 	
-	yinfile = open(os.path.join(arg_opts.dir, "yopts.h.in"))
+	yinfile = open(os.path.join(ytmpl_dir, "yopts.h.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("${PROJ}", yname)
 	
@@ -513,11 +513,11 @@ def generate_cparser():
 	#
 	
 	# Get the template in
-	yinfile = open(os.path.join(arg_opts.dir, "yopts.c.in"))
+	yinfile = open(os.path.join(ytmpl_dir, "yopts.c.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("${PROJ}", yname)
 	
-	yinsfile = open(os.path.join(arg_opts.dir, "yopt_set.c.in"))
+	yinsfile = open(os.path.join(ytmpl_dir, "yopt_set.c.in"))
 	yinscode = yinsfile.read()
 	yinscode = yinscode.replace("${PROJ}", yname)
 	
@@ -1047,7 +1047,7 @@ def generate_bashcomp():
 	else:
 		b_file = "%s_comp.sh" % yname
 
-	yinfile = open(os.path.join(arg_opts.dir, "ycomp.sh.in"))
+	yinfile = open(os.path.join(ytmpl_dir, "ycomp.sh.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("%{PROJ}", yname)
 
