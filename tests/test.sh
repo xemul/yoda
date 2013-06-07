@@ -35,4 +35,10 @@ yoda_exec 255 ./test_ret start --stop-opt --opt-for-stop-opt
 yoda_exec 255 ./test_ret stop --stop-opt
 yoda_exec 255 ./test_ret stop --opt-for-stop-opt
 
+yoda_exec 0   ./test_ret start	--for-status-or-test-req-opt --test-req
+yoda_exec 0   ./test_ret status --for-status-or-test-req-opt
+yoda_exec 0   ./test_ret status --for-status-or-test-req-opt --test-req
+yoda_exec 255 ./test_ret start  --test-req
+yoda_exec 255 ./test_ret status
+
 echo PASS

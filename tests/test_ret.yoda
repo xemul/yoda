@@ -2,6 +2,7 @@ arg	action
 	string	action to perform
 	choice	start		start something
 	choice	stop		stop something
+	choice	status		status of something
 
 option	id/i
 	int	ID of something
@@ -19,3 +20,10 @@ option	stop-opt
 option opt-for-stop-opt
 	bool required for --stop-opt
 	req_for stop-opt
+
+option	test-req
+	bool	test ret_for keyword
+
+option for-status-or-test-req-opt
+	bool	for status action or test-req option
+	req_for	action = status | test-req
