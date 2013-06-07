@@ -1,3 +1,11 @@
+ycomp_%{PROJ}_cond_call()
+{
+	fname="ycomp_%{PROJ}_$1"
+	if declare -f "$fname" > /dev/null; then
+		compgen -W "$($fname)" -- $2
+	fi
+}
+
 ycomp_%{PROJ}() 
 {
 	local cur prev cl_arg

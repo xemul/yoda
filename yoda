@@ -1069,6 +1069,8 @@ def generate_bashcomp():
 
 		if comp_gen:
 			comp_gen="$(compgen %s ${cur})" % comp_gen
+		else:
+			comp_gen="$(ycomp_%s_cond_call %s $cur)" % (yname, opt_cname(yopt))
 
 		yopt_str += "\"%s\")\n" % opt_pname(yopt)
 		yopt_str += "\tCOMPREPLY=(%s)\n" % comp_gen
