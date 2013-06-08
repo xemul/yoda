@@ -425,9 +425,6 @@ for yopt in yopts:
 			print "Boolean option %s can't have optarg" % opt_pname(yopt)
 			sys.exit(1)
 
-# FIXME -- add proper check here. Right now yoda can only generate C parser,
-#          so just check it and bail out if it's something else
-
 if not arg_opts.generate:
 	print "Nothing to generate"
 	sys.exit(0)
