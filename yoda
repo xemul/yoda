@@ -437,12 +437,22 @@ if not arg_opts.generate in generators:
 def c_indent(istr, code):
 	return istr + istr.join(code.splitlines(True))
 	
-def yopt_argname(yopt, dflt):
+def yopt_argname(yopt):
+	if yopt.atype == typ_boolean:
+		return ""
+
+	opt_astrs = {
+		typ_integer: "NUM",
+		typ_string: "STR",
+		typ_path: "PATH",
+	}
+
 	# Remove all but UPPERCASE letters
 	s = filter(lambda x: x.isupper(), yopt.summary)
 	if getattr(yopt, "optarg", None):
 		s = "[%s]" % s
-	return len(s) and s or dflt
+
+	return len(s) and s or opt_astrs[yopt.atype]
 	
 
 def generate_cparser():
@@ -1006,12 +1016,7 @@ def generate_cparser():
 				yopt_sub_str += (delim and ", " or "  ")
 				yopt_sub_str += "--%s" % yopt.lname
 	
-			if yopt.atype == typ_integer:
-				yopt_sub_str += " " + yopt_argname(yopt, "NUM")
-			elif yopt.atype == typ_string:
-				yopt_sub_str += " " + yopt_argname(yopt, "STR")
-			elif yopt.atype == typ_path:
-				yopt_sub_str += " " + yopt_argname(yopt, "PATH")
+			yopt_sub_str += " " + yopt_argname(yopt);
 	
 			yopt_str += yopt_align + "\"" + yopt_indent + \
 				    yopt_sub_str.ljust(12 + yopt_name_len_max) + \
@@ -1143,12 +1148,7 @@ def generate_manopts():
 			continue
 
 		yassign = "%s" % opt_pname(yopt)
-		if yopt.atype == typ_integer:
-			yassign += " " + yopt_argname(yopt, "NUM")
-		elif yopt.atype == typ_string:
-			yassign += " " + yopt_argname(yopt, "STR")
-		elif yopt.atype == typ_path:
-			yassign += " " + yopt_argname(yopt, "PATH")
+		yassign += " " + yopt_argname(yopt)
 
 		yassign = yassign.ljust(7 + yopt_name_len_max)
 
