@@ -371,6 +371,7 @@ for yopt in yopts:
 
 
 	yopt.in_groups = []
+	ygrps = list(set(ygrps)) # remove duplicates
 	for ygrp in ygrps:
 		if getattr(yopt, "lname", None):
 			y = yopt_find_l(yopt.lname, ygrp.yopts)
