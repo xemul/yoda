@@ -1065,7 +1065,7 @@ def generate_bashcomp():
 	if arg_opts.output:
 		b_file = arg_opts.output
 	else:
-		b_file = "%s_comp.sh" % yname
+		b_file = "%s_ycomp.sh" % yname
 
 	yinfile = open(os.path.join(ytmpl_dir, "ycomp.sh.in"))
 	yincode = yinfile.read()
