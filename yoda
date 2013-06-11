@@ -413,6 +413,10 @@ def opt_sname(yopt):
 # Basic validity checks
 
 for yopt in yopts:
+	if not getattr(yopt, "atype", None):
+		print "Option %s without type" % opt_pname(yopt)
+		sys.exit(1)
+
 	if len(yopt.choice):
 		if yopt.atype in (typ_boolean, typ_path):
 			print "Can't have choices for bool/path option %s" % opt_pname(yopt)
