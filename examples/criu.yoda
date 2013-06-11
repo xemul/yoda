@@ -74,18 +74,23 @@ option	ext-unix-sk/x
 
 option	tcp-established
 	bool		checkpoint/restore established TCP connections
+	hgroup		special resources
 
 option	evasive-devices
 	bool		use any path to a device file if the original one is inaccessible
+	hgroup		special resources
 
 option	shell-job/j
 	bool		allow to dump and restore shell jobs
+	hgroup		special resources
 
 option	file-locks/l
 	bool		handle file locks, for safety, only used for container
+	hgroup		special resources
 
 option	link-remap
 	bool		allow to link unlinked files back when possible
+	hgroup		special resources
 
 unset	for
 

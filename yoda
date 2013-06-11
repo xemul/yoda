@@ -869,7 +869,10 @@ def generate_cparser():
 			parts = map(lambda a: a.strip(), exp.split("="))
 	
 			if len(parts) == 1:
-				parts = ['option', parts[0]]
+				if yopt_find_l(parts[0], yopts):
+					parts = ['option', parts[0]]
+				else:
+					parts = ['', parts[0]]
 	
 			if not gacts.has_key(parts[0]):
 				gacts[parts[0]] = []
@@ -879,13 +882,15 @@ def generate_cparser():
 		for t in gacts:
 			if gstr:
 				gstr += " or "
-			gstr += "for "
-			gstr += " or ".join(gacts[t])
+			else:
+				gstr += "for "
+
+			gstr += ", ".join(gacts[t])
 			gstr += " %s" % t
 			if len(gacts[t]) > 1:
 				gstr += "s"
 	
-		return gstr.capitalize()
+		return gstr.capitalize().strip()
 	
 	
 	# Generate requirements checks (req_for-s and clash-es)
