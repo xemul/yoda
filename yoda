@@ -83,6 +83,7 @@ short_version = None
 def_for = None
 def_req_for = None
 def_pile = False
+def_hgroup = None
 auto_alias_dashed = False
 
 def yopt_find_l(s, yopts):
@@ -173,6 +174,8 @@ for l in yfile:
 			yopt.optional_for = def_for
 		if def_req_for:
 			yopt.required_for = def_req_for
+		if def_hgroup:
+			yopt.hgroup = def_hgroup
 
 		yopts.append(yopt)
 
@@ -246,6 +249,8 @@ for l in yfile:
 			def_for = ls[1]
 		elif ls[0] == "req_for":
 			def_req_for = ls[1]
+		elif ls[0] == "hgroup":
+			def_hgroup = ls[1]
 		elif ls[0] == "pile":
 			def_pile = True
 		elif ls[0] == "auto_dash_alias":
@@ -264,6 +269,8 @@ for l in yfile:
 			def_for = None
 		elif ls[1] == "req_for":
 			def_req_for = None
+		elif ls[1] == "hgroup":
+			def_hgroup = None
 		elif ls[1] == "pile":
 			def_pile = False
 		else:
