@@ -515,6 +515,8 @@ def generate_cparser():
 	yopt_str = ""
 	
 	for yopt in yopts:
+		if yopt.atype != typ_string:
+			continue
 		if not len(yopt.choice):
 			continue
 	
