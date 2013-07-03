@@ -524,6 +524,8 @@ def generate_cparser():
 			ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
 	
 		vals = map(lambda x: "\t%s,\n" % x.ccode, yopt.choice)
+		vals.insert(0, "\tYOPT_%s_DFLT = 0,\n" % opt_cname(yopt).upper())
+
 		yopt_str += "enum {\n"
 		yopt_str += "".join(vals)
 		yopt_str += "};\n\n"
