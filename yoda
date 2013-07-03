@@ -729,10 +729,19 @@ def generate_cparser():
 	yopt_str = ""
 	
 	def gen_choice_fixup(yopt):
+		def opt_is_dflt(yopt):
+			if getattr(yopt, "defval", None):
+				if yopt.atype == typ_string:
+					return "!strcmp(%s, %s)" % (opt_sname(yopt), cstrval(yopt.defval))
+				else:
+					return "%s == %s" % (opt_sname(yopt), yopt.defval)
+			else:
+				return "!%s" % opt_sname(yopt)
+
 		yopt_str = ""
 		if yopt.atype == typ_string:
 			if yopt.otype == opt_option:
-				yopt_str += "if (!%s) {\n" % opt_sname(yopt)
+				yopt_str += "if (%s) {\n" % opt_is_dflt(yopt)
 				yopt_str += "\t;\n"
 				yopt_str += "} else "
 	
@@ -764,7 +773,7 @@ def generate_cparser():
 			yopt_str += "\tbreak;\n"
 			yopt_str += "default:\n"
 			if (yopt.otype == opt_option):
-				yopt_str += "\tif (!%s)\n" % opt_sname(yopt)
+				yopt_str += "\tif (%s)\n" % opt_is_dflt(yopt)
 				yopt_str += "\t\tbreak;\n"
 			yopt_str += "\tyopt_print(\"Unknown value for %s\\n\");\n" % opt_pname(yopt)
 			yopt_str += "\tyopt_err = YOPTS_PARSE_ERR;\n"
