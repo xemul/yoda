@@ -513,10 +513,6 @@ def generate_cparser():
 	
 	# Generate constants for choice-d options and arguments
 	yopt_str = ""
-	enum_decl_str = "\
-	enum {\n\
-	%s\
-	};\n\n"
 	
 	for yopt in yopts:
 		if not len(yopt.choice):
@@ -526,7 +522,9 @@ def generate_cparser():
 			ch.ccode = "YOPT_%s_%s" % (opt_cname(yopt).upper(), ch.val.upper().replace("-", "_"))
 	
 		vals = map(lambda x: "\t%s,\n" % x.ccode, yopt.choice)
-		yopt_str += enum_decl_str % "".join(vals)
+		yopt_str += "enum {\n"
+		yopt_str += "".join(vals)
+		yopt_str += "};\n\n"
 	
 	yincode = yincode.replace("${CHOICES}", yopt_str)
 	
