@@ -1028,11 +1028,15 @@ def generate_cparser():
 	yopts_groups.append(("Other", yopts_default))
 	
 	for group in yopts_groups:
-		yopt_str += yopt_align + "\"\\n\"\n"
-		yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
+		header_printed = False
 		for yopt in group[1]:
 			if yopt.otype != opt_option:
 				continue
+
+			if not header_printed:
+				yopt_str += yopt_align + "\"\\n\"\n"
+				yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
+				header_printed = True
 	
 			delim = False
 			if getattr(yopt, "sname", None):
