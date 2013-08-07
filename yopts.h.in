@@ -12,8 +12,8 @@ struct yopts {
 	${STRUCTURE}
 };
 
-extern struct yopts ${PROJ}_yopts;
-extern int ${PROJ}_yopts_parse(int argc, char **argv);
-extern void ${PROJ}_yopts_usage(char *prog);
+extern struct yopts ${PROJ}yopts;
+extern int ${PROJ}yopts_parse(int argc, char **argv);
+extern void ${PROJ}yopts_usage(char *prog);
 
 ${CHOICES}

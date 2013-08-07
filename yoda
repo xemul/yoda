@@ -57,17 +57,21 @@ yopt_groups["generic"] = ygroup("generic")
 # Our own command line
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("-f", "--file", required=True, help="yoda file to parse", type=str)
-arg_parser.add_argument("-n", "--name", required=True, help="project name", type=str)
+arg_parser.add_argument("-n", "--name", required=False, help="project name", type=str)
 arg_parser.add_argument("-g", "--generate", required=False, help="what to generate (%s)" % ", ".join(generators), type=str)
 arg_parser.add_argument("-o", "--output", required=False, help="output file(s), separated with :", type=str)
 arg_opts = arg_parser.parse_args()
 
-if arg_opts.file == None or arg_opts.name == None:
+if arg_opts.file == None:
 	arg_parser.print_help()
 	sys.exit(1)
 
 ytmpl_dir = os.path.dirname(sys.argv[0])
-yname = arg_opts.name;
+if arg_opts.name == None:
+	yname = ""
+else:
+	yname = arg_opts.name;
+	yname += "_"
 	
 # Read yoda file in
 
@@ -415,7 +419,7 @@ def opt_pname(yopt):
 
 # Name of variable (with struct name)
 def opt_sname(yopt):
-	return "%s_yopts.%s" % (yname, opt_cname(yopt))
+	return "%syopts.%s" % (yname, opt_cname(yopt))
 
 # Basic validity checks
 
@@ -477,7 +481,7 @@ def generate_cparser():
 	if arg_opts.output:
 		c_files = arg_opts.output.split(":")
 	else:
-		c_files = [ "%s_yopts.h" % yname, "%s_yopts.c" % yname ]
+		c_files = [ "%syopts.h" % yname, "%syopts.c" % yname ]
 	
 	ctypes = {
 		typ_boolean:	"bool",
@@ -942,7 +946,7 @@ def generate_cparser():
 	yopt_indent = "     "
 	yopt_el = yopt_align + "\"\\n\"\n"
 	
-	yopt_str += yopt_align + "\"" + yopt_indent + yname
+	yopt_str += yopt_align + "\"" + yopt_indent + "%s"
 	for yopt in yopts:
 		if yopt.otype != opt_argument:
 			continue
@@ -1080,7 +1084,7 @@ def generate_bashcomp():
 	if arg_opts.output:
 		b_file = arg_opts.output
 	else:
-		b_file = "%s_ycomp.sh" % yname
+		b_file = "%sycomp.sh" % yname
 
 	yinfile = open(os.path.join(ytmpl_dir, "ycomp.sh.in"))
 	yincode = yinfile.read()
@@ -1105,7 +1109,7 @@ def generate_bashcomp():
 		if comp_gen:
 			comp_gen="$(compgen %s ${cur})" % comp_gen
 		else:
-			comp_gen="$(ycomp_%s_cond_call %s $cur)" % (yname, opt_cname(yopt))
+			comp_gen="$(ycomp_%scond_call %s $cur)" % (yname, opt_cname(yopt))
 
 		yopt_str += "\"%s\")\n" % opt_pname(yopt)
 		yopt_str += "\tCOMPREPLY=(%s)\n" % comp_gen
@@ -1192,7 +1196,7 @@ def generate_manopts():
 	if arg_opts.output:
 		mpage = arg_opts.output
 	else:
-		mpage = "%s.man" % yname
+		mpage = "%s_opt.man" % yname
 
 	youtfile = open(mpage, "w")
 	youtfile.write(yopt_str)

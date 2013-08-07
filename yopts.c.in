@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "${PROJ}_yopts.h"
+#include "${PROJ}yopts.h"
 
 #ifdef YDEBUG
 #define dprint	printf
@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
 	int ret;
 
-	ret = ${PROJ}_yopts_parse(argc, argv);
+	ret = ${PROJ}yopts_parse(argc, argv);
 	printf("Parser returned %d (left %d(%s)... options)\n", ret, yopt_tail, argv[yopt_tail]);
 
 	return ret;
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 #define dprint(...)
 #endif
 
-struct yopts ${PROJ}_yopts = {
+struct yopts ${PROJ}yopts = {
 	${DEFAULTS}
 };
 
@@ -33,16 +33,11 @@ static int yopt_next_arg = 0;
 
 #define YOPTARG_SET	((char *)-1)
 
-static void yopts_usage(char *prog)
+void ${PROJ}yopts_usage(char *prog)
 {
 	printf("Usage:\n"
-${USAGE}
-	);
-}
-
-void ${PROJ}_yopts_usage(char *prog)
-{
-	yopts_usage(prog);
+${USAGE},
+	prog);
 }
 
 __attribute__((weak)) void yopt_print(const char *format, ...)
@@ -148,7 +143,7 @@ ${CHECK_REQS}
 	return yopt_err;
 }
 
-int ${PROJ}_yopts_parse(int argc, char **argv)
+int ${PROJ}yopts_parse(int argc, char **argv)
 {
 	int opt, idx, ret = YOPTS_PARSE_OK;
 	bool permutate = false;
@@ -167,15 +162,15 @@ int ${PROJ}_yopts_parse(int argc, char **argv)
 
 		opt = ycur->assign(opt, argv);
 
-		if (${PROJ}_yopts.version)
+		if (${PROJ}yopts.version)
 			return YOPTS_PARSE_SPECIAL;
 
-		if (${PROJ}_yopts.help)
+		if (${PROJ}yopts.help)
 			yopt_err = YOPTS_PARSE_SPECIAL;
 
 		if (yopt_err) {
 			if (!yopt_next_arg)
-				yopts_usage(argv[0]);
+				${PROJ}yopts_usage(argv[0]);
 			return yopt_err;
 		}
 
