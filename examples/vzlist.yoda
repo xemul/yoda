@@ -1,4 +1,4 @@
-set	short_version	e
+set	short_help	e
 
 option	no-header/H
 	bool	suppress columns header
