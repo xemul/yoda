@@ -28,7 +28,7 @@ option	description/d
 	string	filter containers by description PATtern
 
 option	output/o
-	string	optput only specified FieLDS
+	string	output only specified FIELDS
 
 option	sort/s
 	string	sort by specified FIELD ('-field' for reverse sort)
