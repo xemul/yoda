@@ -21,6 +21,9 @@ import sys
 import os
 import argparse
 
+yoda_version = "0.1"
+yoda_url = "https://github.com/xemul/yoda/"
+
 opt_option = 1
 opt_argument = 2
 
@@ -468,6 +471,12 @@ def yopt_argname(yopt):
 		s = "[%s]" % s
 
 	return len(s) and s or opt_astrs[yopt.atype]
+
+def yoda_put_header(ystr):
+	ystr = ystr.replace("${VERSION}", yoda_version)
+	ystr = ystr.replace("${INPUTFILE}", os.path.basename(arg_opts.file))
+	ystr = ystr.replace("${PROJECT_URL}", yoda_url)
+	return ystr
 	
 
 def generate_cparser():
@@ -496,7 +505,8 @@ def generate_cparser():
 	yinfile = open(os.path.join(ytmpl_dir, "yopts.h.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("${PROJ}", yname)
-	
+	yincode = yoda_put_header(yincode)
+
 	# Generate the yopts structure
 	yopt_str = ""
 	def opt_vdecl(vtyp, vname, ptr = False):
@@ -549,7 +559,8 @@ def generate_cparser():
 	yinfile = open(os.path.join(ytmpl_dir, "yopts.c.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("${PROJ}", yname)
-	
+	yincode = yoda_put_header(yincode)
+
 	yinsfile = open(os.path.join(ytmpl_dir, "yopt_set.c.in"))
 	yinscode = yinsfile.read()
 	yinscode = yinscode.replace("${PROJ}", yname)
@@ -1089,6 +1100,7 @@ def generate_bashcomp():
 	yinfile = open(os.path.join(ytmpl_dir, "ycomp.sh.in"))
 	yincode = yinfile.read()
 	yincode = yincode.replace("%{PROJ}", yname)
+	yincode = yoda_put_header(yincode)
 
 	# Generate arguments for options with such
 	yopt_str=""
