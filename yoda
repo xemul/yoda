@@ -560,6 +560,7 @@ def generate_cparser():
 	yincode = yinfile.read()
 	yincode = yincode.replace("${PROJ}", yname)
 	yincode = yoda_put_header(yincode)
+	yincode = yincode.replace("${HEADERFILE}", os.path.basename(c_files[0]))
 
 	yinsfile = open(os.path.join(ytmpl_dir, "yopt_set.c.in"))
 	yinscode = yinsfile.read()
