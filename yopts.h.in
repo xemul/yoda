@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
-void yopt_print(const char *format, ...);
+void yopt_print(const char *format, ...)
+	__attribute__ ((__format__ (__printf__, 1, 2)));
 void *yopt_realloc(void *ptr, unsigned long size);
 extern int yopt_tail;
 
