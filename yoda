@@ -1029,7 +1029,8 @@ def generate_cparser():
 	
 	yopts_groups = map(lambda k: (yoda_get_group_desc(k[0]), k[1]), yopts_groups)
 	yopts_groups.insert(0, ("Generic", yopts_generic))
-	yopts_groups.append(("Other", yopts_default))
+	if (len(yopts_default)):
+		yopts_groups.append(("Other", yopts_default))
 	
 	for group in yopts_groups:
 		header_printed = False
@@ -1037,7 +1038,7 @@ def generate_cparser():
 			if yopt.otype != opt_option:
 				continue
 
-			if not header_printed:
+			if (not header_printed) and (len(yopt_groups) > 1):
 				yopt_str += yopt_align + "\"\\n\"\n"
 				yopt_str += yopt_align + "\"* %s:\\n\"\n" % group[0]
 				header_printed = True
