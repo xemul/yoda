@@ -71,7 +71,6 @@ if arg_opts.name == None:
 	yname = ""
 else:
 	yname = arg_opts.name;
-	yname += "_"
 	
 # Read yoda file in
 
@@ -1085,7 +1084,7 @@ def generate_bashcomp():
 	if arg_opts.output:
 		b_file = arg_opts.output
 	else:
-		b_file = "%sycomp.sh" % yname
+		b_file = "%s_ycomp.sh" % yname
 
 	yinfile = open(os.path.join(ytmpl_dir, "ycomp.sh.in"))
 	yincode = yinfile.read()
@@ -1110,7 +1109,7 @@ def generate_bashcomp():
 		if comp_gen:
 			comp_gen="$(compgen %s ${cur})" % comp_gen
 		else:
-			comp_gen="$(ycomp_%scond_call %s $cur)" % (yname, opt_cname(yopt))
+			comp_gen="$(ycomp_%s_cond_call %s $cur)" % (yname, opt_cname(yopt))
 
 		yopt_str += "\"%s\")\n" % opt_pname(yopt)
 		yopt_str += "\tCOMPREPLY=(%s)\n" % comp_gen
@@ -1205,6 +1204,8 @@ def generate_manopts():
 
 
 if arg_opts.generate == "cparser":
+	if yname:
+		yname += "_"
 	generate_cparser()
 elif arg_opts.generate == "bashcomp":
 	generate_bashcomp()
